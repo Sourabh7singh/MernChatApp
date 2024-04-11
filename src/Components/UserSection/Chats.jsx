@@ -2,7 +2,7 @@ import React, { useEffect, useId, useState } from 'react'
 import Avatar from '../../assets/MyProfile.png'
 const Chats = (props) => {
     const {setmessages,setCurrentChat}=props.data;
-    const userId = JSON.parse(localStorage.getItem("user")).id;
+    const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [Conversations,setConversations]=useState([]);
     const [Addusersmenu,setAddusersmenu]=useState(false);
     const [Users,setUsers]=useState([]);
