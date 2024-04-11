@@ -78,7 +78,7 @@ router.get("/fetchuser/:userId",async(req,res)=>{
     const {userId} = req.params;
     try {
         const user = await User.findById(userId);
-        res.json({id:user._id,name:user.name,email:user.email,username:user.username});
+        res.json({id:user._id,name:user.name,email:user.email,username:user.username,profile:user.profile});
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: "Some error occurred" });
