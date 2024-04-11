@@ -3,17 +3,60 @@ import { useNavigate } from 'react-router-dom'
 import Chats from './UserSection/Chats'
 import Profile from './UserSection/Profile'
 import Groups from './UserSection/Groups'
+import MyProfile from '../assets/MyProfile.png'
 const Dashboard = () => {
+    const ServerUrl = 'http://localhost:5001';
     const navigate = useNavigate();
-    const [Section,setSection]=useState('Chats');
-    const [messages,setmessages]=useState([])
+    const userId = JSON.parse(localStorage.getItem("user"))?.id;
+    const [Section, setSection] = useState('Chats');
+    const [messages, setmessages] = useState([]);
     const LoggedInUser = localStorage.getItem("user");
+    const [CurrentChat, setCurrentChat] = useState(null);
+    const [text, setText] = useState("");
     useEffect(() => {
         if (!LoggedInUser) {
             navigate("/login")
         }
     }, [])
-    
+    const convertTo12HourFormat=(utcTime)=>{
+        const date = new Date(utcTime);
+        date.setHours(date.getHours());
+        date.setMinutes(date.getMinutes());
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        let hours12 = hours % 12;
+        hours12 = hours12 ? hours12 : 12;
+        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes}${ampm}`;
+        return formattedTime;
+    }
+
+    const HandleSubmit = async(e) => {
+        e.preventDefault();
+        let Data ={};
+        if(messages.length===0){
+            Data = {
+                senderId: userId,
+                message: text,
+                receiverId: CurrentChat?.id
+            }
+        }
+        else{
+            Data={
+                senderId: userId,
+                message: text,
+                ConversationId: messages[0].conversationId
+            }
+        }
+        await fetch(`${ServerUrl}/api/conversation/sendMessage`, {
+            method: "POST",
+            headers: {
+                'Content-Type': "application/json"
+            },
+            body:JSON.stringify(Data)
+        })
+        setText("");
+    }
     return (
         <div className='h-screen w-full flex justify-center items-center'>
             {/* Side bar */}
@@ -38,16 +81,42 @@ const Dashboard = () => {
             </div>
             {/* Users Section */}
             <div className='Available-Users-Section bg-gray-300 h-full w-1/5 overflow-y-scroll'>
-                {Section==='Chats'&&<Chats setmessages={setmessages}/>}
-                {Section==='Profile'&&<Profile/>}
-                {Section==='Groups'&&<Groups/>}
+                {Section === 'Chats' && <Chats data={{ setmessages, setCurrentChat }} />}
+                {Section === 'Profile' && <Profile />}
+                {Section === 'Groups' && <Groups data={{ setmessages, setCurrentChat }}/>}
             </div>
             {/* Main-Chat screen */}
-            <div className='Main-chat-Screen bg-gray-500 h-full' style={{width:`calc(80% - 112px)`}}>
-                <div className='User-Details sticky bg-slate-50 top-0 font-mono h-24'>
-                    {messages.length>0 && messages.map((msg,index)=>{
-                        return <div key={index}>{msg.text}</div>
+            <div className='Main-chat-Screen bg-gray-500 h-full' style={{ width: `calc(80% - 112px)` }}>
+                <div className='User-Details sticky bg-slate-50 top-0 font-mono h-16 flex justify-center items-center'>
+                    <div className='User-Profile-Image mr-2 ml-2'>
+                        <img src={CurrentChat?.profile} className='rounded-full' alt="" height={50} width={50} onError={(e) => { e.target.src = MyProfile }} />
+                    </div>
+                    {CurrentChat?.username && <div className='User-Name mr-2 ml-2'>{CurrentChat && "@" + CurrentChat?.username}</div>}
+                    {CurrentChat?.groupName && <div className='User-Name mr-2 ml-2'>{CurrentChat && CurrentChat?.groupName}</div>}
+                </div>
+                <div className="ChatScreen">
+                    {messages.length > 0 && messages.map((msg, index) => {
+                        return (
+                            <div key={index} className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-4 m-2' : 'right block ml-auto w-fit bg-lime-500 p-4 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px",maxWidth:"60%"}}>
+                                <div className="name font-mono mb-1">{msg.senderId !== userId ? `${Section=='Chats'?CurrentChat?.name:msg?.name}` : "Me"}</div>
+                                <div className="message ">
+                                    <div className="text">{msg.text}</div>
+                                    <p className="time text-right text-sm">{convertTo12HourFormat(msg.date)}</p>
+                                </div>
+                            </div>
+                        )
                     })}
+                </div>
+                <div className="Send-Message sticky top-full">
+                    <form onSubmit={(e)=>HandleSubmit(e)}>
+                        <input type="text" placeholder="Type your message here..." value={text} onChange={(e) => setText(e.target.value)} className=" p-2 h-12 bg-slate-100 border-0 focus:outline-none focus:ring-0 focus:shadow-none w-full" />
+                        <label htmlFor="send" className='cursor-pointer absolute' style={{ right: "10px", top: "50%", transform: "translateY(-50%)" }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                            </svg>
+                        </label>
+                        <button type="submit" id='send' className="d-none" disabled={text.length === 0}></button>
+                    </form>
                 </div>
             </div>
         </div>

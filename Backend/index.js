@@ -18,6 +18,8 @@ app.post('/', (req, res) => {
 })
 app.use("/api/user",require('./Routes/User'));
 app.use("/api/conversation",require("./Routes/Conversation"))
+app.use("/api/groups",require("./Routes/Groups"))
+
 
 app.listen(port,()=>{
     console.log(`Server Running on port ${port}`)

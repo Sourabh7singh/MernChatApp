@@ -2,6 +2,7 @@ const express = require('express');
 const Conversation = require('../Models/Conversation');
 const User = require('../Models/User');
 const Message = require('../Models/Message');
+const Groups = require('../Models/Groups');
 const router = express.Router();
 
 router.post("/sendMessage", async (req, res) => {
@@ -42,7 +43,6 @@ router.get("/fetchConversations/:userId", async (req, res) => {
     var Allconversation = [];
     try {
         const ConversationRoom = await Conversation.find({ members: { $in: userId } });
-        console.log(ConversationRoom);
         const userPromises = [];
 
         ConversationRoom.forEach((item) => {
@@ -56,8 +56,7 @@ router.get("/fetchConversations/:userId", async (req, res) => {
             const { members } = item;
             const userNames = members.map((id) => {
                 const user = usersData.find((user) => user._id.toString() === id.toString());
-                console.log(user.profile);
-                return { id: user._id, name: user.name, username: user.username, profile: user.profile };
+                return { id: user._id, name: user.name, username: user.username, profile: user.profile,conversationId:item._id };
             });            
             Allconversation.push(userNames);
         });
@@ -72,6 +71,9 @@ router.post("/fetchMessages",async(req,res)=>{
     const {senderId,receiverId} = req.body;
     try {
         const conversation = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });    
+        if(!conversation){
+            return res.json([]);
+        }
         const conversationId = conversation._id;
         const messages = await Message.find({conversationId})
         res.json(messages)
@@ -81,13 +83,18 @@ router.post("/fetchMessages",async(req,res)=>{
     }
 })
 
-// Fetch Messages
-// router.get("/getMessages/:ConversationId",async(req,res)=>{
-//     const {ConversationId} = req.params;
-//     try {
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ msg: "Some error occurred" });
-//     }
-// })
+// Groups
+router.post("/createGroup", async (req, res) => {
+    const { name,members,admin } = req.body;
+    try {
+        const newGroup = await Groups.create({ name,members,admin });
+        newGroup.save();
+        res.json({ msg: "Group Created Successfully",group:newGroup });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred" });
+    }
+});
+
+
 module.exports = router;
