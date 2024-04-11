@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const Login = (props) => {
-  const ServerUrl = 'http://localhost:5001'
+  const ServerUrl = import.meta.env.VITE_SERVER_URL;
   const [isLoading, setloading] = useState(false);
   const [Responce, setResponce] = useState(false);
   const navigate = useNavigate();
@@ -39,16 +39,12 @@ const Login = (props) => {
       localStorage.setItem("user", JSON.stringify(responce.user))
       navigate("/")
     }
-
-
   }
   return (
     <div className='h-screen w-full flex justify-center items-center bg-slate-400'>
       <div>
         <ToastContainer />
       </div>
-      {/* {ShowSuccess && <SuccessToast responce={Responce}/>}
-      {ShowError && <ErrorToast responce={Responce}/>} */}
       <div className="w-screen max-w-md">
         <form className="bg-white shadow-lg rounded px-8 pt-6 pb-8 mb-4" >
           {!isLogin && <div className="mb-4">

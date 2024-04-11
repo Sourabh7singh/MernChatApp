@@ -3,7 +3,7 @@ import Avatar from '../../assets/MyProfile.png'
 const Groups = (props) => {
   const {setmessages,setCurrentChat}=props.data;
   const [groups,setGroups]=useState([]);
-  const ServerUrl = 'http://localhost:5001'
+  const ServerUrl = import.meta.env.VITE_SERVER_URL;
   useEffect(()=>{
       // Fetch Chats
       const FetchConversations=async()=>{

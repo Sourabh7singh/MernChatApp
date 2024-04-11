@@ -5,7 +5,7 @@ import Profile from './UserSection/Profile'
 import Groups from './UserSection/Groups'
 import MyProfile from '../assets/MyProfile.png'
 const Dashboard = () => {
-    const ServerUrl = 'http://localhost:5001';
+    const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const navigate = useNavigate();
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [Section, setSection] = useState('Chats');

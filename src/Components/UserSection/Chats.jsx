@@ -6,10 +6,10 @@ const Chats = (props) => {
     const [Conversations,setConversations]=useState([]);
     const [Addusersmenu,setAddusersmenu]=useState(false);
     const [Users,setUsers]=useState([]);
-    const ServerUrl = 'http://localhost:5001'
+    const ServerUrl = import.meta.env.VITE_SERVER_URL
     const FetchConversations=async()=>{
         const userid = JSON.parse(localStorage.getItem("user")).id;
-        const result = await fetch(`http://localhost:5001/api/conversation/fetchConversations/${userid}`)
+        const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations/${userid}`)
         const responce = await result.json();
         setConversations(responce.map((item,index)=>{
             return item.filter((user)=>user.id!==userid)[0]
