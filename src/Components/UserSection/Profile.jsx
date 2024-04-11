@@ -5,10 +5,8 @@ const Profile = () => {
     const [user,setUser]=useState({});
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const FetchUser =async()=>{
-        // const responce = await fetch(`${ServerUrl}/api/user/fetchUser/${userId}`);
         const responce = await fetch(`${ServerUrl}/api/user/fetchUser/${userId}`);
         const user = await responce.json();
-        console.log(user);
         setUser(user);
     }
     useEffect(()=>{

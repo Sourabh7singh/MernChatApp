@@ -6,19 +6,19 @@ import Groups from './UserSection/Groups'
 import MyProfile from '../assets/MyProfile.png'
 const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
-    const navigate = useNavigate();
-    const userId = JSON.parse(localStorage.getItem("user"))?.id;
-    const [Section, setSection] = useState('Chats');
-    const [messages, setmessages] = useState([]);
     const LoggedInUser = localStorage.getItem("user");
-    const [CurrentChat, setCurrentChat] = useState(null);
-    const [text, setText] = useState("");
+    const navigate = useNavigate();
     useEffect(() => {
         if (!LoggedInUser) {
             navigate("/login")
         }
     }, [])
-    const convertTo12HourFormat=(utcTime)=>{
+    const [Section, setSection] = useState('Chats');
+    const [messages, setmessages] = useState([]);
+    const [CurrentChat, setCurrentChat] = useState(null);
+    const [text, setText] = useState("");
+    const userId = JSON.parse(localStorage.getItem("user"))?.id;
+    const convertTo12HourFormat = (utcTime) => {
         const date = new Date(utcTime);
         date.setHours(date.getHours());
         date.setMinutes(date.getMinutes());
@@ -31,18 +31,18 @@ const Dashboard = () => {
         return formattedTime;
     }
 
-    const HandleSubmit = async(e) => {
+    const HandleSubmit = async (e) => {
         e.preventDefault();
-        let Data ={};
-        if(messages.length===0){
+        let Data = {};
+        if (messages.length === 0) {
             Data = {
                 senderId: userId,
                 message: text,
                 receiverId: CurrentChat?.id
             }
         }
-        else{
-            Data={
+        else {
+            Data = {
                 senderId: userId,
                 message: text,
                 ConversationId: messages[0].conversationId
@@ -53,7 +53,7 @@ const Dashboard = () => {
             headers: {
                 'Content-Type': "application/json"
             },
-            body:JSON.stringify(Data)
+            body: JSON.stringify(Data)
         })
         setText("");
     }
@@ -83,7 +83,7 @@ const Dashboard = () => {
             <div className='Available-Users-Section bg-gray-300 h-full w-1/5 overflow-y-scroll'>
                 {Section === 'Chats' && <Chats data={{ setmessages, setCurrentChat }} />}
                 {Section === 'Profile' && <Profile />}
-                {Section === 'Groups' && <Groups data={{ setmessages, setCurrentChat }}/>}
+                {Section === 'Groups' && <Groups data={{ setmessages, setCurrentChat }} />}
             </div>
             {/* Main-Chat screen */}
             <div className='Main-chat-Screen bg-gray-500 h-full' style={{ width: `calc(80% - 112px)` }}>
@@ -97,8 +97,8 @@ const Dashboard = () => {
                 <div className="ChatScreen">
                     {messages.length > 0 && messages.map((msg, index) => {
                         return (
-                            <div key={index} className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-4 m-2' : 'right block ml-auto w-fit bg-lime-500 p-4 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px",maxWidth:"60%"}}>
-                                <div className="name font-mono mb-1">{msg.senderId !== userId ? `${Section=='Chats'?CurrentChat?.name:msg?.name}` : "Me"}</div>
+                            <div key={index} className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-4 m-2' : 'right block ml-auto w-fit bg-lime-500 p-4 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "60%" }}>
+                                <div className="name font-mono mb-1">{msg.senderId !== userId ? `${Section == 'Chats' ? CurrentChat?.name : msg?.name}` : "Me"}</div>
                                 <div className="message ">
                                     <div className="text">{msg.text}</div>
                                     <p className="time text-right text-sm">{convertTo12HourFormat(msg.date)}</p>
@@ -108,7 +108,7 @@ const Dashboard = () => {
                     })}
                 </div>
                 <div className="Send-Message sticky top-full">
-                    <form onSubmit={(e)=>HandleSubmit(e)}>
+                    <form onSubmit={(e) => HandleSubmit(e)}>
                         <input type="text" placeholder="Type your message here..." value={text} onChange={(e) => setText(e.target.value)} className=" p-2 h-12 bg-slate-100 border-0 focus:outline-none focus:ring-0 focus:shadow-none w-full" />
                         <label htmlFor="send" className='cursor-pointer absolute' style={{ right: "10px", top: "50%", transform: "translateY(-50%)" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
