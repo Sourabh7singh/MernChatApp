@@ -29,9 +29,9 @@ const Dashboard = () => {
     },[])
     useEffect(()=>{
         socket?.emit('addUser',userId);
-        // socket?.on("getUsers",users=>{
-        //     console.log("Active Users :>>",users);
-        // });
+        socket?.on("getUsers",users=>{
+            console.log("Active Users :>>",users);
+        });
         socket?.on("getMessage",(data)=>{
             if(data.senderId===userId){return}
             setmessages(prev=>([...prev,{ senderId: data.senderId, text: data.text, receiverId: data.receiverId, date: Date.now() }]))
