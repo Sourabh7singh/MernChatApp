@@ -11,6 +11,7 @@ const Chats = (props) => {
         const userid = JSON.parse(localStorage.getItem("user"))?.id;
         const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations/${userid}`)
         const responce = await result.json();
+        console.log(responce);
         setConversations(responce.map((item, index) => {
             return item.filter((user) => user.id !== userid)[0]
         }));

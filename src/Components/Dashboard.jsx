@@ -25,7 +25,8 @@ const Dashboard = () => {
         setCurrentChat(null);
     }, [Section]);
     useEffect(()=>{
-        setSocket(io(import.meta.env.VITE_SOCKET_URL));
+        setSocket(io(import.meta.env.VITE_SERVER_URL));
+        console.log(import.meta.env.VITE_SERVER_URL);
     },[])
     useEffect(()=>{
         socket?.emit('addUser',userId);
