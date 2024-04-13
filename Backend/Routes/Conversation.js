@@ -3,14 +3,8 @@ const Conversation = require('../Models/Conversation');
 const User = require('../Models/User');
 const Message = require('../Models/Message');
 const Groups = require('../Models/Groups');
+const { Await } = require('react-router-dom');
 const router = express.Router();
-// const { Server } = require('socket.io');
-
-// const io = require('socket.io')(5002,{
-//     cors:{
-//         origin:"*"
-//     }
-// });
 
 //Non Realtime Routes
 router.post("/sendMessage", async (req, res) => {
@@ -20,7 +14,6 @@ router.post("/sendMessage", async (req, res) => {
         const Messages = await Message.create({ conversationId:ConversationId, senderId, text: message })
         Messages.save();
         res.json({ msg: "Message Sent Successfully" })
-
     }
     //New Conversation totally
     else {
@@ -85,6 +78,33 @@ router.post("/fetchMessages",async(req,res)=>{
         const conversationId = conversation._id;
         const messages = await Message.find({conversationId})
         res.json(messages)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred" });
+    }
+})
+
+router.delete("/deleteConversation/:conversationId",async(req,res)=>{
+    const {conversationId} = req.params;
+    try {
+        await Conversation.findByIdAndDelete(conversationId);
+        res.json({msg:"Conversation Deleted Successfully"})
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred" });
+    }
+})
+
+router.post("/deleteMessage",async(req,res)=>{
+    const {text,date} = req.body;
+    try {
+        const message = await Message.findOne({text,date});
+        if(!message){
+            return res.json({msg:"Message Not Found",Success:false});
+        }
+        await Message.findByIdAndDelete(message._id);
+        console.log(message);
+        res.json({msg:"Message Deleted Successfully",Success:true});
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: "Some error occurred" });

@@ -1,12 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Chats from './UserSection/Chats'
 import Profile from './UserSection/Profile'
 import Groups from './UserSection/Groups'
 import MyProfile from '../assets/MyProfile.png'
-import {io} from 'socket.io-client'
+import { io } from 'socket.io-client'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Avatar from '../assets/MyProfile.png'
+import { DashboardContext } from '../Contexts/DashboardContext'
+
 const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
+    const {Users,fetchUsers,convertTo12HourFormat,OpenContextMenu,ShowContextMenu,setShowContextMenu,
+    coordinates,setCoordinates,selectedMessage,setSelectedMessage,CustomContextMenu} = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
     const navigate = useNavigate();
@@ -16,45 +23,51 @@ const Dashboard = () => {
         }
     }, [])
     const [Section, setSection] = useState('Chats');
-    const [socket,setSocket]=useState(null);
+    const [socket, setSocket] = useState(null);
     const [messages, setmessages] = useState([]);
     const [CurrentChat, setCurrentChat] = useState(null);
     const [text, setText] = useState("");
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
+
+    const [Addusersmenu, setAddusersmenu] = useState(false);
+
+    useEffect(() => {
+        window.addEventListener("click", (e) => {
+            setShowContextMenu(false);
+            setSelectedMessage(null)
+        })
+        return () => {
+            window.removeEventListener("click", (e) => {
+                setShowContextMenu(false)
+                setSelectedMessage(null)
+            })
+        }
+    })
+
     useEffect(() => {
         setCurrentChat(null);
     }, [Section]);
-    useEffect(()=>{
+    
+    useEffect(() => {
         setSocket(io(import.meta.env.VITE_SERVER_URL));
-        console.log(import.meta.env.VITE_SERVER_URL);
-    },[])
-    useEffect(()=>{
-        socket?.emit('addUser',userId);
-        socket?.on("getUsers",users=>{
-            console.log("Active Users :>>",users);
+        fetchUsers();
+    }, [])
+    
+    useEffect(() => {
+        socket?.emit('addUser', userId);
+        socket?.on("getUsers", users => {
+            console.log("Active Users :>>", users);
         });
-        socket?.on("getMessage",(data)=>{
-            if(data.senderId===userId){return}
-            setmessages(prev=>([...prev,{ senderId: data.senderId, text: data.text, receiverId: data.receiverId, date: Date.now() }]))
-            // setmessages([...messages, { senderId: data.senderId, text, receiverId: data.receiverId, date: Date.now() }]);
+        socket?.on("getMessage", (data) => {
+            if (data.senderId === userId) { return }
+            setmessages(prev => ([...prev, { senderId: data.senderId, text: data.text, receiverId: data.receiverId, date: Date.now() }]))
         })
-    },[socket])
+    }, [socket])
+    
     useEffect(() => {
         messageRef.current?.scrollIntoView({ behavior: "smooth" });
-    },[messages])
-    const convertTo12HourFormat = (utcTime) => {
-        const date = new Date(utcTime);
-        date.setHours(date.getHours());
-        date.setMinutes(date.getMinutes());
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-        let hours12 = hours % 12;
-        hours12 = hours12 ? hours12 : 12;
-        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes}${ampm}`;
-        return formattedTime;
-    }
-
+    }, [messages])
+    
     const HandleSubmit = async (e) => {
         e.preventDefault();
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id });
@@ -84,8 +97,36 @@ const Dashboard = () => {
         })
         setText("");
     }
+    
+    const HandleCopyMessage = () => {
+        navigator.clipboard.writeText(selectedMessage?.text);
+    }
+    const HandleDeleteMessage = async () => {
+        const choice = window.confirm("Are you sure ?");
+        //Fetch Request to api
+        const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
+            method: "POST",
+            headers: {
+                'Content-type': "application/json"
+            },
+            body: JSON.stringify({ text: selectedMessage?.text, date: selectedMessage?.date })
+        });
+        const result = await responce.json();
+        if (!result.Success) {
+            toast("Please Try again in some time");
+        }
+        else {
+            toast("Message Deleted Successfully");
+            setmessages(messages.filter((message) => message.date !== selectedMessage.date))
+        }
+    }
+    
+
     return (
         <div className='h-screen w-full flex justify-center items-center'>
+            <div>
+                <ToastContainer />
+            </div>
             {/* Left Section */}
             <div className='Main Section bg-gray-300 h-screen overflow-y-scroll w-1/4 relative'>
                 <div className='expanded-sidebar p-2 flex justify-between items-center h-20 fixed top-0 left-0 w-1/4 bg-slate-800'>
@@ -102,6 +143,23 @@ const Dashboard = () => {
                             <svg fill="#FFFFFF" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.73,16.663A3.467,3.467,0,0,0,20.5,14.5a3.5,3.5,0,0,0-7,0,3.467,3.467,0,0,0,.77,2.163A6.04,6.04,0,0,0,12,18.69a6.04,6.04,0,0,0-2.27-2.027A3.467,3.467,0,0,0,10.5,14.5a3.5,3.5,0,0,0-7,0,3.467,3.467,0,0,0,.77,2.163A6,6,0,0,0,1,22a1,1,0,0,0,1,1H22a1,1,0,0,0,1-1A6,6,0,0,0,19.73,16.663ZM7,13a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,7,13ZM3.126,21a4,4,0,0,1,7.748,0ZM17,13a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,17,13Zm-3.873,8a4,4,0,0,1,7.746,0ZM7.2,8.4A1,1,0,0,0,8.8,9.6a4,4,0,0,1,6.4,0,1,1,0,1,0,1.6-1.2,6,6,0,0,0-2.065-1.742A3.464,3.464,0,0,0,15.5,4.5a3.5,3.5,0,0,0-7,0,3.464,3.464,0,0,0,.765,2.157A5.994,5.994,0,0,0,7.2,8.4ZM12,3a1.5,1.5,0,1,1-1.5,1.5A1.5,1.5,0,0,1,12,3Z" /></svg>                        </div>
                         <div className='profile p-1 m-2 cursor-pointer' onClick={() => setSection('Profile')} title='Profile'>
                             <svg viewBox="0 0 24 24" fill="none" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.12 12.78C12.05 12.77 11.96 12.77 11.88 12.78C10.12 12.72 8.71997 11.28 8.71997 9.50998C8.71997 7.69998 10.18 6.22998 12 6.22998C13.81 6.22998 15.28 7.69998 15.28 9.50998C15.27 11.28 13.88 12.72 12.12 12.78Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M18.74 19.3801C16.96 21.0101 14.6 22.0001 12 22.0001C9.40001 22.0001 7.04001 21.0101 5.26001 19.3801C5.36001 18.4401 5.96001 17.5201 7.03001 16.8001C9.77001 14.9801 14.25 14.9801 16.97 16.8001C18.04 17.5201 18.64 18.4401 18.74 19.3801Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+                        </div>
+                        <div className="Create-Conversation text-[30px]" onClick={() => { setAddusersmenu(!Addusersmenu) }} style={{ border: "2px solid transparent", height: "30px", width: "30px", textAlign: "center", borderRadius: "50%", cursor: "pointer", backgroundColor: "green", color: "white", fontWeight: "bold" }}>
+                            +{Addusersmenu && <div className="Addusers-Menu absolute bg-gray-600 max-h-[300px] overflow-y-auto left-full top-2/4">
+                                <div className='text-center font-thin text-lg p-2 m-1'>
+                                    <h5>Start New Conversation</h5>
+                                </div>
+                                <div className='text-center font-thin text-lg p-2 m-1'>
+                                    {Users && Users.map((user) => {
+                                        return <div className='text-center font-thin text-lg p-2 m-1 flex justify-between items-center cursor-pointer' key={user.id} onClick={(e) => { FetchMessages(user) }}>
+                                            <div className='UserProfile m-1'>
+                                                <img src={user.profile} alt="profile" className='rounded-full' height={40} width={40} onError={(e) => { e.target.src = Avatar }} />
+                                            </div>
+                                            <span className='font-light m-1'>{user.username}</span>
+                                        </div>
+                                    })}
+                                </div>
+                            </div>}
                         </div>
                     </div>
                 </div>
@@ -140,18 +198,19 @@ const Dashboard = () => {
                 <div className="ChatScreen overflow-y-scroll" style={{ height: "calc(100vh - 7rem)" }}>
                     {messages.length > 0 && messages.map((msg, index) => {
                         return (
-                            <div key={index}>
-                            <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "60%", minWidth: "10%" }}>
-                                <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
-                                <div className="message ">
-                                    <div className="text">{msg.text}</div>
-                                    <p className="time text-right text-xs">{convertTo12HourFormat(msg.date)}</p>
+                            <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>
+                                <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "60%", minWidth: "10%" }}>
+                                    <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
+                                    <div className="message ">
+                                        <div className="text">{msg.text}</div>
+                                        <p className="time text-right text-xs">{convertTo12HourFormat(msg.date)}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div ref={messageRef}></div>
+                                <div ref={messageRef}></div>
                             </div>
                         )
                     })}
+                    {ShowContextMenu && <CustomContextMenu />}
                 </div>
                 <div className="Send-Message sticky top-full">
                     <form onSubmit={(e) => HandleSubmit(e)}>
