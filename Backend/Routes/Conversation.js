@@ -3,7 +3,6 @@ const Conversation = require('../Models/Conversation');
 const User = require('../Models/User');
 const Message = require('../Models/Message');
 const Groups = require('../Models/Groups');
-const { Await } = require('react-router-dom');
 const router = express.Router();
 
 //Non Realtime Routes
