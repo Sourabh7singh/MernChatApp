@@ -15,6 +15,9 @@ const io = new Server(server,{
         origin:"*"
     }
 });
+app.use(bodyParser.json({limit:"10mb"}))
+app.use(cors());
+app.use(express.json());
 
 ConnectToMongo();
 let users = [];
@@ -49,9 +52,6 @@ io.on('connection', (socket) => {
     })
 })
 
-app.use(bodyParser.json({limit:"10mb"}))
-app.use(cors());
-app.use(express.json());
 
 app.post('/', (req, res) => {
     res.json("Server running");  
