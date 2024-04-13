@@ -31,7 +31,7 @@ router.post("/sendMessage", async (req, res) => {
             res.json({ msg: "Message Sent Successfully" })
         } catch (error) {
             res.status(500).json({ msg: "Some error occurred" });
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -87,6 +87,7 @@ router.delete("/deleteConversation/:conversationId",async(req,res)=>{
     const {conversationId} = req.params;
     try {
         await Conversation.findByIdAndDelete(conversationId);
+        await Message.deleteMany({conversationId});
         res.json({msg:"Conversation Deleted Successfully"})
     } catch (error) {
         console.error(error);
@@ -102,7 +103,6 @@ router.post("/deleteMessage",async(req,res)=>{
             return res.json({msg:"Message Not Found",Success:false});
         }
         await Message.findByIdAndDelete(message._id);
-        console.log(message);
         res.json({msg:"Message Deleted Successfully",Success:true});
     } catch (error) {
         console.error(error);

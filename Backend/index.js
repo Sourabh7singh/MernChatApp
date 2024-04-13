@@ -23,7 +23,7 @@ ConnectToMongo();
 let users = [];
 //Realtime Routes
 io.on('connection', (socket) => {
-    console.log("New User Connected", socket.id);
+    // console.log("New User Connected", socket.id);
     socket.on("addUser",(userId)=>{
         const isUserExist = users.find(user=>user.userId===userId);
         if(!isUserExist){
@@ -33,9 +33,7 @@ io.on('connection', (socket) => {
         }
     })
     socket.on('send-message', (data) => {
-        console.log(data);
         const existUser = users.find(user => user.userId === data.receiverId);
-        console.log("Exist User>>",existUser);
         if (existUser) {
             console.log("User Exist",existUser.socketId);
             io.to(existUser.socketId).emit("getMessage", data);
@@ -47,7 +45,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        console.log("User Disconnected", socket.id);
+        // console.log("User Disconnected", socket.id);
         users = users.filter(user => user.socketId !== socket.id);
     })
 })

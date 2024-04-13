@@ -12,8 +12,10 @@ import { DashboardContext } from '../Contexts/DashboardContext'
 
 const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
-    const {Users,fetchUsers,convertTo12HourFormat,OpenContextMenu,ShowContextMenu,setShowContextMenu,
-    coordinates,setCoordinates,selectedMessage,setSelectedMessage,CustomContextMenu} = useContext(DashboardContext);
+    const { Users, fetchUsers, convertTo12HourFormat, ShowContextMenu, setShowContextMenu,
+        setUsers,
+        coordinates, setCoordinates, selectedMessage, setSelectedMessage, Conversations, setConversations
+        , FetchMessages, messages, setmessages, CurrentChat, setCurrentChat,FetchGroups } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
     const navigate = useNavigate();
@@ -24,35 +26,21 @@ const Dashboard = () => {
     }, [])
     const [Section, setSection] = useState('Chats');
     const [socket, setSocket] = useState(null);
-    const [messages, setmessages] = useState([]);
-    const [CurrentChat, setCurrentChat] = useState(null);
     const [text, setText] = useState("");
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
-
+    const [SelectedGroupUsers, setSelectedGroupUsers] = useState([userId]);
+    const [groupName, setGroupName] = useState("");
     const [Addusersmenu, setAddusersmenu] = useState(false);
-
-    useEffect(() => {
-        window.addEventListener("click", (e) => {
-            setShowContextMenu(false);
-            setSelectedMessage(null)
-        })
-        return () => {
-            window.removeEventListener("click", (e) => {
-                setShowContextMenu(false)
-                setSelectedMessage(null)
-            })
-        }
-    })
 
     useEffect(() => {
         setCurrentChat(null);
     }, [Section]);
-    
+
     useEffect(() => {
         setSocket(io(import.meta.env.VITE_SERVER_URL));
         fetchUsers();
     }, [])
-    
+
     useEffect(() => {
         socket?.emit('addUser', userId);
         socket?.on("getUsers", users => {
@@ -63,11 +51,28 @@ const Dashboard = () => {
             setmessages(prev => ([...prev, { senderId: data.senderId, text: data.text, receiverId: data.receiverId, date: Date.now() }]))
         })
     }, [socket])
-    
+
     useEffect(() => {
         messageRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages])
-    
+    const OpenContextMenu = (e, message) => {
+        e.preventDefault();
+        setCoordinates({ x: e.clientX, y: e.clientY });
+        setShowContextMenu(!ShowContextMenu);
+        setSelectedMessage(message);
+    }
+    const HandleDeleteConversation = async () => {
+        if (!CurrentChat) return;
+        if (Section === 'Chats') {
+            console.log(CurrentChat);
+            await fetch(`${ServerUrl}/api/conversation/deleteConversation/${CurrentChat?.conversationId}`, { method: "DELETE" })
+            setConversations(Conversations.filter((item) => item.conversationId !== CurrentChat?.conversationId))
+            toast("Conversation Deleted Successfully");
+        }
+        else {
+            //For Group
+        }
+    }
     const HandleSubmit = async (e) => {
         e.preventDefault();
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id });
@@ -97,13 +102,14 @@ const Dashboard = () => {
         })
         setText("");
     }
-    
+
     const HandleCopyMessage = () => {
         navigator.clipboard.writeText(selectedMessage?.text);
     }
     const HandleDeleteMessage = async () => {
         const choice = window.confirm("Are you sure ?");
         //Fetch Request to api
+        if (!choice) return;
         const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
             method: "POST",
             headers: {
@@ -120,15 +126,52 @@ const Dashboard = () => {
             setmessages(messages.filter((message) => message.date !== selectedMessage.date))
         }
     }
-    
+    const CustomContextMenu = () => {
+        return (
+            <div className='context-menu absolute bg-slate-500 text-lg p-2' style={{ top: `calc(${coordinates.y}px - 70px)`, left: `calc(${coordinates.x}px - 200px)`, width: "200px" }}>
+                <ul className='utils list-none'>
+                    <li className='bg-slate-800 cursor-pointer rounded-md text-white text-center' style={{ border: "2px solid black" }} onClick={() => { HandleCopyMessage() }}>Copy</li>
+                    <li className='bg-slate-800 cursor-pointer rounded-md text-white text-center' style={{ border: "2px solid black" }} onClick={() => { HandleDeleteMessage() }}>Delete</li>
+                </ul>
+            </div>
+        )
+    }
 
+    const HandleUserSelection = (user) => {
+        if(SelectedGroupUsers.includes(user.id)){
+            setSelectedGroupUsers(SelectedGroupUsers.filter((item) => item.id !== user.id));
+        }
+        else{
+            setSelectedGroupUsers([...SelectedGroupUsers,user.id]);
+        }
+        // setUsers(Users.filter((item) => item.id !== user.id));
+    }
+    const CreateGroup = async() => {
+        setAddusersmenu(false);
+        const responce = await fetch(`${ServerUrl}/api/groups/createGroup`, {
+            method: "POST",
+            headers: {
+                'Content-type': "application/json"
+            },
+            body: JSON.stringify({groupName,members:SelectedGroupUsers,admin:userId})
+        })
+        const result = await responce.json();
+        if(!result.Success){
+            toast("Please Try again in some time");
+        }
+        else{
+            toast("Group Created Successfully");
+            FetchGroups();
+        }
+
+    }
     return (
         <div className='h-screen w-full flex justify-center items-center'>
             <div>
                 <ToastContainer />
             </div>
             {/* Left Section */}
-            <div className='Main Section bg-gray-300 h-screen overflow-y-scroll w-1/4 relative'>
+            <div className='Main Section bg-gray-300 h-screen overflow-y-scroll w-1/4'>
                 <div className='expanded-sidebar p-2 flex justify-between items-center h-20 fixed top-0 left-0 w-1/4 bg-slate-800'>
                     <div className='sidebar-left m-2'>
                         <h2 className='font-serif font-bold text-white'>
@@ -144,22 +187,40 @@ const Dashboard = () => {
                         <div className='profile p-1 m-2 cursor-pointer' onClick={() => setSection('Profile')} title='Profile'>
                             <svg viewBox="0 0 24 24" fill="none" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.12 12.78C12.05 12.77 11.96 12.77 11.88 12.78C10.12 12.72 8.71997 11.28 8.71997 9.50998C8.71997 7.69998 10.18 6.22998 12 6.22998C13.81 6.22998 15.28 7.69998 15.28 9.50998C15.27 11.28 13.88 12.72 12.12 12.78Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M18.74 19.3801C16.96 21.0101 14.6 22.0001 12 22.0001C9.40001 22.0001 7.04001 21.0101 5.26001 19.3801C5.36001 18.4401 5.96001 17.5201 7.03001 16.8001C9.77001 14.9801 14.25 14.9801 16.97 16.8001C18.04 17.5201 18.64 18.4401 18.74 19.3801Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
                         </div>
-                        <div className="Create-Conversation text-[30px]" onClick={() => { setAddusersmenu(!Addusersmenu) }} style={{ border: "2px solid transparent", height: "30px", width: "30px", textAlign: "center", borderRadius: "50%", cursor: "pointer", backgroundColor: "green", color: "white", fontWeight: "bold" }}>
-                            +{Addusersmenu && <div className="Addusers-Menu absolute bg-gray-600 max-h-[300px] overflow-y-auto left-full top-2/4">
-                                <div className='text-center font-thin text-lg p-2 m-1'>
-                                    <h5>Start New Conversation</h5>
-                                </div>
-                                <div className='text-center font-thin text-lg p-2 m-1'>
-                                    {Users && Users.map((user) => {
-                                        return <div className='text-center font-thin text-lg p-2 m-1 flex justify-between items-center cursor-pointer' key={user.id} onClick={(e) => { FetchMessages(user) }}>
-                                            <div className='UserProfile m-1'>
-                                                <img src={user.profile} alt="profile" className='rounded-full' height={40} width={40} onError={(e) => { e.target.src = Avatar }} />
+                        <div className="Create-Conversation text-[30px]" style={{ border: "2px solid transparent", height: "30px", width: "30px", textAlign: "center", borderRadius: "50%", cursor: "pointer", backgroundColor: "green", color: "white", fontWeight: "bold" }}>
+                            <div onClick={()=>{setAddusersmenu(!Addusersmenu)}}>+</div>
+                            {Addusersmenu &&
+                                <div className="Addusers-Menu absolute bg-gray-600 max-h-[600px] overflow-y-auto left-full top-4/5 z-10">
+                                    <div className='flex text-center font-thin text-lg p-2 m-1 justify-between items-center' style={{ borderBottom: "2px solid black" }}>
+                                        <h5>Start New Conversation</h5>
+                                        {Section === 'Groups' && <div className="create-coversation cursor-pointer" title='Create' onClick={() => { CreateGroup() }}>
+                                            <svg fill="#FFFFFF" viewBox="0 0 20 20" className='h-6 w-6' xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M10,1a9,9,0,1,0,9,9A9,9,0,0,0,10,1Zm0,16.4A7.4,7.4,0,1,1,15.52,5.09L9,11.59,5.68,8.29,4.28,9.71,9,14.41l7.61-7.63A7.29,7.29,0,0,1,17.4,10,7.41,7.41,0,0,1,10,17.4Z"></path> </g> </g></svg>
+                                        </div>}
+                                    </div>
+                                    {Section==='Groups' && <div className='text-center font-thin text-lg p-2 m-1'>
+                                        <input type="text" placeholder='Enter the name of the Group' className='text-center font-thin text-lg p-2 m-1 text-black' value={groupName} onChange={(e)=>{setGroupName(e.target.value)}}/>
+                                    </div>}
+                                    <div className='text-center font-thin text-lg p-2 m-1'>
+                                        {Section === 'Chats' && Users && Users.map((user) => {
+                                            return <div className='text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer' key={user.id} onClick={(e) => { FetchMessages(user),setAddusersmenu(!Addusersmenu) }}>
+                                                <div className='UserProfile m-2 min-h-10 min-w-10'>
+                                                    <img src={user.profile} alt="profile" className='rounded-full h-10 w-10' onError={(e) => { e.target.src = Avatar }} />
+                                                </div>
+                                                <span className='font-light m-2'>{user.username}</span>
                                             </div>
-                                            <span className='font-light m-1'>{user.username}</span>
-                                        </div>
-                                    })}
+                                        })}
+                                        {Section === 'Groups' && Users && Users.map((user) => {
+                                            return <div className={`text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer  rounded-2xl hover:bg-slate-600 ${SelectedGroupUsers.includes(user.id) ? "bg-slate-700" : "bg-slate-900"}`} key={user.id} onClick={(e) => HandleUserSelection(user) }>
+                                                <div className='UserProfile m-2 min-h-10 min-w-10'>
+                                                    <img src={user.profile} alt="profile" className='rounded-full h-10 w-10' onError={(e) => { e.target.src = Avatar }} />
+                                                </div>
+                                                <span className='font-light m-2'>{user.username}</span>
+                                            </div>
+                                        })}
+
+                                    </div>
                                 </div>
-                            </div>}
+                            }
                         </div>
                     </div>
                 </div>
@@ -189,7 +250,7 @@ const Dashboard = () => {
                             {CurrentChat?.groupName && <div className="members mr-2 ml-2">Members: {CurrentChat.members.length}</div>}
                         </div>
                     </div>
-                    <div className="delete m-2 cursor-pointer " title='Delete'>
+                    <div className="delete m-2 cursor-pointer " title='Delete' onClick={(e) => { HandleDeleteConversation(e) }}>
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
                             <g fillOpacity="0" fill="#dddddd" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10" strokeDasharray="" strokeDashoffset="0" fontFamily="none" fontWeight="none" fontSize="none" textAnchor="none" style={{ mixBlendMode: "normal" }}><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#000000" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10" strokeDasharray="" strokeDashoffset="0" fontFamily="none" fontWeight="none" fontSize="none" textAnchor="none" style={{ mixBlendMode: "normal" }}><g transform="scale(10.66667,10.66667)"><path d="M10,2l-1,1h-6v2h1.10938l1.7832,15.25586v0.00781c0.13102,0.98666 0.98774,1.73633 1.98242,1.73633h8.24805c0.99468,0 1.8514,-0.74968 1.98242,-1.73633l0.00195,-0.00781l1.7832,-15.25586h1.10938v-2h-6l-1,-1zM6.125,5h11.75l-1.75195,15h-8.24805z"></path></g></g>
                         </svg>
@@ -210,7 +271,7 @@ const Dashboard = () => {
                             </div>
                         )
                     })}
-                    {ShowContextMenu && <CustomContextMenu />}
+                    {ShowContextMenu && <CustomContextMenu data={{ HandleCopyMessage, HandleDeleteMessage }} />}
                 </div>
                 <div className="Send-Message sticky top-full">
                     <form onSubmit={(e) => HandleSubmit(e)}>

@@ -1,9 +1,10 @@
-import React, { useEffect, useId, useState } from 'react'
+import React, { useContext, useEffect, useId, useState } from 'react'
 import Avatar from '../../assets/MyProfile.png'
+import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const { setmessages, setCurrentChat } = props.data;
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
-    const [Conversations, setConversations] = useState([]);
+    const {Conversations,setConversations,FetchMessages} = useContext(DashboardContext)
     const [Users, setUsers] = useState([]);
     const ServerUrl = import.meta.env.VITE_SERVER_URL
     const FetchConversations = async () => {
@@ -18,18 +19,7 @@ const Chats = (props) => {
         // Fetch Chats
         FetchConversations();
     }, [])
-    const FetchMessages = async (user) => {
-        setCurrentChat(user);
-        const responce = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
-            method: "POST",
-            headers: {
-                'Content-type': "application/json"
-            },
-            body: JSON.stringify({ senderId: user.id, receiverId: JSON.parse(localStorage.getItem("user")).id })
-        })
-        const Messages = await responce.json();
-        setmessages(Messages);
-    }
+    
     return (
         <>
             {/* <div className='flex justify-between items-center font-thin text-lg p-2 m-1 mt-32'>

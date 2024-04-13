@@ -29,7 +29,7 @@ router.post("/signup",[
                 });
             }
         } catch (error) {
-            console.log("Error",error);
+            console.error("Error",error);
             res.status(500).json({ msg: "Some error occurred" });
         }
     }
@@ -53,7 +53,7 @@ router.post("/login",[
             res.json({msg:"Invalid Credentials",Success:false})
         }
     } catch (error) {
-        console.log("Error",error);
+        console.error("Error",error);
         res.status(500).json({ msg: "Some error occurred",Success:false});
     }
 })

@@ -8,7 +8,12 @@ const DashboardProvider = ({ children }) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [ShowContextMenu, setShowContextMenu] = useState(false);
     const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
+    const [Conversations, setConversations] = useState([]);
     const [selectedMessage, setSelectedMessage] = useState(null);
+    const [messages, setmessages] = useState([]);
+    const [CurrentChat, setCurrentChat] = useState(null);
+    const [groups, setGroups] = useState([]);
+
 
     // States
     const [Users, setUsers] = useState([]);
@@ -20,6 +25,20 @@ const DashboardProvider = ({ children }) => {
         const responce = await result.json();
         setUsers(responce);
     }
+
+    const FetchMessages = async (user) => {
+        setCurrentChat(user);
+        const responce = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
+            method: "POST",
+            headers: {
+                'Content-type': "application/json"
+            },
+            body: JSON.stringify({ senderId: user.id, receiverId: JSON.parse(localStorage.getItem("user")).id })
+        })
+        const Messages = await responce.json();
+        setmessages(Messages);
+    }
+
     const convertTo12HourFormat = (utcTime) => {
         const date = new Date(utcTime);
         date.setHours(date.getHours());
@@ -32,35 +51,34 @@ const DashboardProvider = ({ children }) => {
         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes}${ampm}`;
         return formattedTime;
     }
+    const FetchGroups = async () => {
+        const userid = JSON.parse(localStorage.getItem("user")).id;
+        const result = await fetch(`${ServerUrl}/api/groups/getgroups/${userid}`)
+        const responce = await result.json();
+        setGroups(responce);
+      }
 
-    const OpenContextMenu = (e, message) => {
-        e.preventDefault();
-        setCoordinates({ x: e.clientX, y: e.clientY });
-        setShowContextMenu(!ShowContextMenu);
-        setSelectedMessage(message);
-    }
-    const CustomContextMenu = () => {
-        return (
-            <div className='context-menu absolute bg-slate-500 text-lg p-2' style={{ top: `calc(${coordinates.y}px - 70px)`, left: `calc(${coordinates.x}px - 200px)`, width: "200px" }}>
-                <ul className='utils list-none'>
-                    <li className='bg-slate-800 cursor-pointer rounded-md text-white text-center' style={{ border: "2px solid black" }} onClick={() => { HandleCopyMessage() }}>Copy</li>
-                    <li className='bg-slate-800 cursor-pointer rounded-md text-white text-center' style={{ border: "2px solid black" }} onClick={() => { HandleDeleteMessage() }}>Delete</li>
-                </ul>
-            </div>
-        )
-    }
     return (
         <DashboardContext.Provider value={{
             Users,
+            setUsers,
             fetchUsers,
             convertTo12HourFormat,
-            OpenContextMenu,
             ShowContextMenu,
             setShowContextMenu,
             coordinates,
             selectedMessage,
             setCoordinates,
-            CustomContextMenu
+            Conversations,
+            setConversations,
+            FetchMessages,
+            messages,
+            setmessages,
+            CurrentChat,
+            setCurrentChat,
+            FetchGroups,
+            groups,
+            setGroups
             }}>
             {children}
         </DashboardContext.Provider>

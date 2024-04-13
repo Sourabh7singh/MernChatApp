@@ -1,18 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Avatar from '../../assets/MyProfile.png'
+import { DashboardContext } from '../../Contexts/DashboardContext';
 const Groups = (props) => {
   const { setmessages, setCurrentChat } = props.data;
-  const [groups, setGroups] = useState([]);
+  const {FetchGroups,groups}=useContext(DashboardContext);
   const ServerUrl = import.meta.env.VITE_SERVER_URL;
   useEffect(() => {
+    FetchGroups();
     // Fetch Chats
-    const FetchConversations = async () => {
-      const userid = JSON.parse(localStorage.getItem("user")).id;
-      const result = await fetch(`${ServerUrl}/api/groups/getgroups/${userid}`)
-      const responce = await result.json();
-      setGroups(responce);
-    }
-    FetchConversations();
   }, [])
   const FetchGroupMessages = async (group) => {
     setCurrentChat(group);
