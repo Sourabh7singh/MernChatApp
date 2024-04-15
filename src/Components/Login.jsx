@@ -22,7 +22,7 @@ const Login = (props) => {
       url = `${ServerUrl}/api/user/login`;
     }
     else {
-      url = `${ServerUrl}/api/user/signup;`
+      url = `${ServerUrl}/api/user/signup`;
     }
     const result = await fetch(url, {
       method: "POST",
