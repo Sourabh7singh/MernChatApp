@@ -1,24 +1,27 @@
 import { createContext, useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
 
 export const DashboardContext = createContext();
 
 
 const DashboardProvider = ({ children }) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
+    
+    
+    // States
+    const [Users, setUsers] = useState([]);
+    const [socket, setSocket] = useState(null);
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [ShowContextMenu, setShowContextMenu] = useState(false);
     const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
     const [Conversations, setConversations] = useState([]);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [messages, setmessages] = useState([]);
-    const [CurrentChat, setCurrentChat] = useState(null);
+    const [CurrentChat, setCurrentChat] = useState("");
     const [groups, setGroups] = useState([]);
+    const [notificationCount, setNotificationCount] = useState([]);
 
-
-    // States
-    const [Users, setUsers] = useState([]);
-
-
+  
     //Functions
     const fetchUsers = async () => {
         const result = await fetch(`${ServerUrl}/api/user/fetchUsers/${userId}`)
@@ -27,7 +30,8 @@ const DashboardProvider = ({ children }) => {
     }
 
     const FetchMessages = async (user) => {
-        setCurrentChat(user);
+        if(!user) return;
+        let newnotificationCount = notificationCount.filter((item) => item.id !== user.id);
         const responce = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
             method: "POST",
             headers: {
@@ -66,6 +70,7 @@ const DashboardProvider = ({ children }) => {
             convertTo12HourFormat,
             ShowContextMenu,
             setShowContextMenu,
+            setSelectedMessage,
             coordinates,
             selectedMessage,
             setCoordinates,
@@ -78,7 +83,11 @@ const DashboardProvider = ({ children }) => {
             setCurrentChat,
             FetchGroups,
             groups,
-            setGroups
+            setGroups,
+            notificationCount,
+            setNotificationCount,
+            socket,
+            setSocket
             }}>
             {children}
         </DashboardContext.Provider>

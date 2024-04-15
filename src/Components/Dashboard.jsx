@@ -15,7 +15,8 @@ const Dashboard = () => {
     const { Users, fetchUsers, convertTo12HourFormat, ShowContextMenu, setShowContextMenu,
         setUsers,
         coordinates, setCoordinates, selectedMessage, setSelectedMessage, Conversations, setConversations
-        , FetchMessages, messages, setmessages, CurrentChat, setCurrentChat,FetchGroups } = useContext(DashboardContext);
+        , FetchMessages, messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount,
+        socket, setSocket, SelectedChatcompare } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
     const navigate = useNavigate();
@@ -24,8 +25,9 @@ const Dashboard = () => {
             navigate("/login")
         }
     }, [])
+
     const [Section, setSection] = useState('Chats');
-    const [socket, setSocket] = useState(null);
+
     const [text, setText] = useState("");
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [SelectedGroupUsers, setSelectedGroupUsers] = useState([userId]);
@@ -45,12 +47,22 @@ const Dashboard = () => {
         socket?.emit('addUser', userId);
         socket?.on("getUsers", users => {
             console.log("Active Users :>>", users);
-        });
-        socket?.on("getMessage", (data) => {
-            if (data.senderId === userId) { return }
-            setmessages(prev => ([...prev, { senderId: data.senderId, text: data.text, receiverId: data.receiverId, date: Date.now() }]))
         })
-    }, [socket])
+        socket?.on("getMessage", (data)=>{
+            if(messages.length===0){return};
+            if (CurrentChat.id === data.senderId) {
+                console.log("Notification from current user",data.text);
+                setmessages(prev => ([...prev, data]));
+            }
+            else{
+                console.log("Notification from other user");
+                toast("New Message")
+            }
+        })
+        return ()=>{socket?.off("getMessage")}
+    },[socket,messages]);
+    
+
 
     useEffect(() => {
         messageRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,13 +87,15 @@ const Dashboard = () => {
     }
     const HandleSubmit = async (e) => {
         e.preventDefault();
-        socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id });
+        socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() });
         let Data = {};
         if (messages.length === 0) {
+            console.log(Date.now());
             Data = {
                 senderId: userId,
                 message: text,
-                receiverId: CurrentChat?.id
+                receiverId: CurrentChat?.id,
+                date: Date.now()
             }
             setmessages([...messages, { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() }]);
         }
@@ -89,7 +103,8 @@ const Dashboard = () => {
             Data = {
                 senderId: userId,
                 message: text,
-                ConversationId: messages[0].conversationId
+                ConversationId: messages[0].conversationId,
+                date: Date.now()
             }
             setmessages([...messages, { senderId: userId, text, ConversationId: messages[0].conversationId, date: Date.now() }]);
         }
@@ -107,9 +122,6 @@ const Dashboard = () => {
         navigator.clipboard.writeText(selectedMessage?.text);
     }
     const HandleDeleteMessage = async () => {
-        const choice = window.confirm("Are you sure ?");
-        //Fetch Request to api
-        if (!choice) return;
         const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
             method: "POST",
             headers: {
@@ -124,6 +136,7 @@ const Dashboard = () => {
         else {
             toast("Message Deleted Successfully");
             setmessages(messages.filter((message) => message.date !== selectedMessage.date))
+            setShowContextMenu(false);
         }
     }
     const CustomContextMenu = () => {
@@ -138,28 +151,28 @@ const Dashboard = () => {
     }
 
     const HandleUserSelection = (user) => {
-        if(SelectedGroupUsers.includes(user.id)){
+        if (SelectedGroupUsers.includes(user.id)) {
             setSelectedGroupUsers(SelectedGroupUsers.filter((item) => item.id !== user.id));
         }
-        else{
-            setSelectedGroupUsers([...SelectedGroupUsers,user.id]);
+        else {
+            setSelectedGroupUsers([...SelectedGroupUsers, user.id]);
         }
         // setUsers(Users.filter((item) => item.id !== user.id));
     }
-    const CreateGroup = async() => {
+    const CreateGroup = async () => {
         setAddusersmenu(false);
         const responce = await fetch(`${ServerUrl}/api/groups/createGroup`, {
             method: "POST",
             headers: {
                 'Content-type': "application/json"
             },
-            body: JSON.stringify({groupName,members:SelectedGroupUsers,admin:userId})
+            body: JSON.stringify({ groupName, members: SelectedGroupUsers, admin: userId })
         })
         const result = await responce.json();
-        if(!result.Success){
+        if (!result.Success) {
             toast("Please Try again in some time");
         }
-        else{
+        else {
             toast("Group Created Successfully");
             FetchGroups();
         }
@@ -171,8 +184,8 @@ const Dashboard = () => {
                 <ToastContainer />
             </div>
             {/* Left Section */}
-            <div className='Main Section bg-gray-300 h-screen overflow-y-scroll w-1/4'>
-                <div className='expanded-sidebar p-2 flex justify-between items-center h-20 fixed top-0 left-0 w-1/4 bg-slate-800'>
+            <div className='Main Section bg-gray-300 h-screen overflow-y-scroll w-1/4 min-w-[260px]'>
+                <div className='expanded-sidebar p-2 flex justify-between items-center h-20 fixed top-0 min-w-[260px] left-0 w-1/4 bg-slate-800'>
                     <div className='sidebar-left m-2'>
                         <h2 className='font-serif font-bold text-white'>
                             Web-Chat
@@ -188,7 +201,7 @@ const Dashboard = () => {
                             <svg viewBox="0 0 24 24" fill="none" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.12 12.78C12.05 12.77 11.96 12.77 11.88 12.78C10.12 12.72 8.71997 11.28 8.71997 9.50998C8.71997 7.69998 10.18 6.22998 12 6.22998C13.81 6.22998 15.28 7.69998 15.28 9.50998C15.27 11.28 13.88 12.72 12.12 12.78Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M18.74 19.3801C16.96 21.0101 14.6 22.0001 12 22.0001C9.40001 22.0001 7.04001 21.0101 5.26001 19.3801C5.36001 18.4401 5.96001 17.5201 7.03001 16.8001C9.77001 14.9801 14.25 14.9801 16.97 16.8001C18.04 17.5201 18.64 18.4401 18.74 19.3801Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#FFFFFF" strokeWidth="1.9200000000000004" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
                         </div>
                         <div className="Create-Conversation text-[30px]" style={{ border: "2px solid transparent", height: "30px", width: "30px", textAlign: "center", borderRadius: "50%", cursor: "pointer", backgroundColor: "green", color: "white", fontWeight: "bold" }}>
-                            <div onClick={()=>{setAddusersmenu(!Addusersmenu)}}>+</div>
+                            <div onClick={() => { setAddusersmenu(!Addusersmenu) }}>+</div>
                             {Addusersmenu &&
                                 <div className="Addusers-Menu absolute bg-gray-600 max-h-[600px] overflow-y-auto left-full top-4/5 z-10">
                                     <div className='flex text-center font-thin text-lg p-2 m-1 justify-between items-center' style={{ borderBottom: "2px solid black" }}>
@@ -197,12 +210,12 @@ const Dashboard = () => {
                                             <svg fill="#FFFFFF" viewBox="0 0 20 20" className='h-6 w-6' xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M10,1a9,9,0,1,0,9,9A9,9,0,0,0,10,1Zm0,16.4A7.4,7.4,0,1,1,15.52,5.09L9,11.59,5.68,8.29,4.28,9.71,9,14.41l7.61-7.63A7.29,7.29,0,0,1,17.4,10,7.41,7.41,0,0,1,10,17.4Z"></path> </g> </g></svg>
                                         </div>}
                                     </div>
-                                    {Section==='Groups' && <div className='text-center font-thin text-lg p-2 m-1'>
-                                        <input type="text" placeholder='Enter the name of the Group' className='text-center font-thin text-lg p-2 m-1 text-black' value={groupName} onChange={(e)=>{setGroupName(e.target.value)}}/>
+                                    {Section === 'Groups' && <div className='text-center font-thin text-lg p-2 m-1'>
+                                        <input type="text" placeholder='Enter the name of the Group' className='text-center font-thin text-lg p-2 m-1 text-black' value={groupName} onChange={(e) => { setGroupName(e.target.value) }} />
                                     </div>}
                                     <div className='text-center font-thin text-lg p-2 m-1'>
                                         {Section === 'Chats' && Users && Users.map((user) => {
-                                            return <div className='text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer' key={user.id} onClick={(e) => { FetchMessages(user),setAddusersmenu(!Addusersmenu) }}>
+                                            return <div className='text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer' key={user.id} onClick={(e) => { setCurrentChat(user), setAddusersmenu(!Addusersmenu) }}>
                                                 <div className='UserProfile m-2 min-h-10 min-w-10'>
                                                     <img src={user.profile} alt="profile" className='rounded-full h-10 w-10' onError={(e) => { e.target.src = Avatar }} />
                                                 </div>
@@ -210,7 +223,7 @@ const Dashboard = () => {
                                             </div>
                                         })}
                                         {Section === 'Groups' && Users && Users.map((user) => {
-                                            return <div className={`text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer  rounded-2xl hover:bg-slate-600 ${SelectedGroupUsers.includes(user.id) ? "bg-slate-700" : "bg-slate-900"}`} key={user.id} onClick={(e) => HandleUserSelection(user) }>
+                                            return <div className={`text-center font-thin text-lg p-2 m-1 flex items-center cursor-pointer  rounded-2xl hover:bg-slate-600 ${SelectedGroupUsers.includes(user.id) ? "bg-slate-700" : "bg-slate-900"}`} key={user.id} onClick={(e) => HandleUserSelection(user)}>
                                                 <div className='UserProfile m-2 min-h-10 min-w-10'>
                                                     <img src={user.profile} alt="profile" className='rounded-full h-10 w-10' onError={(e) => { e.target.src = Avatar }} />
                                                 </div>
@@ -225,7 +238,7 @@ const Dashboard = () => {
                     </div>
                 </div>
                 {/* Search Bar */}
-                <div className='search-bar fixed w-1/4 top-20 h-14 bg-slate-800 pl-2 pr-2'>
+                <div className='search-bar fixed w-1/4 top-20 h-14 bg-slate-800 pl-2 pr-2 min-w-[260px]'>
                     <input type="text" className='w-full p-3 rounded-2xl' placeholder='Search...' />
                     <div className='cursor-pointer absolute top-2 right-4'>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,7 +246,7 @@ const Dashboard = () => {
                         </svg>
                     </div>
                 </div>
-                {Section === 'Chats' && <Chats data={{ setmessages, setCurrentChat }} />}
+                {Section === 'Chats' && <Chats />}
                 {Section === 'Profile' && <Profile />}
                 {Section === 'Groups' && <Groups data={{ setmessages, setCurrentChat }} />}
             </div>
@@ -260,11 +273,14 @@ const Dashboard = () => {
                     {messages.length > 0 && messages.map((msg, index) => {
                         return (
                             <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>
-                                <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "60%", minWidth: "10%" }}>
+                                <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "60%", minWidth: "15%" }}>
                                     <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
                                     <div className="message ">
                                         <div className="text">{msg.text}</div>
-                                        <p className="time text-right text-xs">{convertTo12HourFormat(msg.date)}</p>
+                                        <div className='time flex justify-between align-baseline pt-1'>
+                                            {/* <p className="time text-right text-xs">{msg?.date?.slice(0, 10)}</p> */}
+                                            <p className="time text-right text-xs">{convertTo12HourFormat(msg.date)}</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div ref={messageRef}></div>

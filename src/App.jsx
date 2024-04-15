@@ -10,11 +10,7 @@ function App() {
       <Routes>
         <Route path="/">
           <Route index element={
-            <>
-              <DashboardProvider>
-                <Dashboard />
-              </DashboardProvider>
-            </>
+            <Dashboard />
           } />
           <Route path='/login' element={<Login isLogin={true} />} />
           <Route path='/signup' element={<Login isLogin={false} />} />
