@@ -18,6 +18,7 @@ router.post("/sendMessage", async (req, res) => {
     else {
         try {
             const { senderId, receiverId, message } = req.body;
+            console.log(senderId, receiverId, message);
             //Check if conversation with this sender and receiver exists or not
             let ConversationRoom = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });
             if(!ConversationRoom){

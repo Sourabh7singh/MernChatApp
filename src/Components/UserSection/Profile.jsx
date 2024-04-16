@@ -15,7 +15,7 @@ const Profile = () => {
     return (
         // Redesign completely
         <>
-            <div className='My-details flex justify-center items-center pt-2 pb-2 border-b-2 border-slate-400 mt-36'>
+            <div className='My-details flex justify-center items-center pt-2 pb-2 border-b-2 border-slate-400'>
                 <div className="profile-Image w-1/2 h-full">
                     <img src={user?.profile} className='h-16 w-16 rounded-full m-auto' alt="Profile Image" onError={(e) => { e.target.src = MyProfile }} />
                 </div>

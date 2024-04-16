@@ -84,4 +84,21 @@ router.get("/fetchuser/:userId",async(req,res)=>{
         res.status(500).json({ msg: "Some error occurred" });
     }
 })
+
+router.get("/searchusers",async(req,res)=>{
+    try {
+        const keyword = req.query.search ? {
+            $or: [
+                { name: { $regex: req.query.search, $options: "i" } },
+                { username : { $regex: req.query.search, $options: "i" } },
+        ]}:{}
+        let users = await User.find(keyword).select("-password");
+        let allusers = users.filter((user) => user._id.toString() !== req.query.userId.toString());
+        let newusers = allusers.map((user) => ({ id: user._id, name: user.name, username: user.username, profile: user.profile }));
+        res.json(newusers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred" });
+    }
+});
 module.exports = router;

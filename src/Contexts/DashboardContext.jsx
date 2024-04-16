@@ -6,8 +6,7 @@ export const DashboardContext = createContext();
 
 const DashboardProvider = ({ children }) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
-    
-    
+
     // States
     const [Users, setUsers] = useState([]);
     const [socket, setSocket] = useState(null);
@@ -17,11 +16,13 @@ const DashboardProvider = ({ children }) => {
     const [Conversations, setConversations] = useState([]);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [messages, setmessages] = useState([]);
+    const [loading,setLoading] = useState(false);
+    const[ConversationLoading,setConversationLoading] = useState(false);
     const [CurrentChat, setCurrentChat] = useState("");
     const [groups, setGroups] = useState([]);
     const [notificationCount, setNotificationCount] = useState([]);
 
-  
+
     //Functions
     const fetchUsers = async () => {
         const result = await fetch(`${ServerUrl}/api/user/fetchUsers/${userId}`)
@@ -30,17 +31,18 @@ const DashboardProvider = ({ children }) => {
     }
 
     const FetchMessages = async (user) => {
-        if(!user) return;
-        let newnotificationCount = notificationCount.filter((item) => item.id !== user.id);
+        setLoading(true)
+        if (!user) return;
         const responce = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
             method: "POST",
             headers: {
                 'Content-type': "application/json"
             },
-            body: JSON.stringify({ senderId: user.id, receiverId: JSON.parse(localStorage.getItem("user")).id })
+            body: JSON.stringify({ senderId: userId, receiverId:CurrentChat?.id })
         })
         const Messages = await responce.json();
         setmessages(Messages);
+        setLoading(false)
     }
 
     const convertTo12HourFormat = (utcTime) => {
@@ -60,11 +62,24 @@ const DashboardProvider = ({ children }) => {
         const result = await fetch(`${ServerUrl}/api/groups/getgroups/${userid}`)
         const responce = await result.json();
         setGroups(responce);
-      }
+    }
+
+    const FetchConversations = async () => {
+        setConversationLoading(true)
+        const userid = JSON.parse(localStorage.getItem("user"))?.id;
+        const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations/${userid}`)
+        const responce = await result.json();
+        setConversations(responce.map((item, index) => {
+            const user = item.filter((user) => user.id !== userid)[0]
+            return user
+        }));
+        setConversationLoading(false)
+    }
 
     return (
         <DashboardContext.Provider value={{
             Users,
+            ServerUrl,
             setUsers,
             fetchUsers,
             convertTo12HourFormat,
@@ -87,8 +102,13 @@ const DashboardProvider = ({ children }) => {
             notificationCount,
             setNotificationCount,
             socket,
-            setSocket
-            }}>
+            setSocket,
+            FetchConversations,
+            loading,
+            setLoading,
+            ConversationLoading,
+            setConversationLoading
+        }}>
             {children}
         </DashboardContext.Provider>
     )
