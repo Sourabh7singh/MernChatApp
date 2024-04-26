@@ -65,15 +65,15 @@ const DashboardProvider = ({ children }) => {
     }
 
     const FetchConversations = async () => {
-        setConversationLoading(true)
+        setConversationLoading(true);
         const userid = JSON.parse(localStorage.getItem("user"))?.id;
         const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations/${userid}`)
         const responce = await result.json();
-        setConversations(responce.map((item, index) => {
+        setConversations(responce.map((item) => {
             const user = item.filter((user) => user.id !== userid)[0]
             return user
         }));
-        setConversationLoading(false)
+        setConversationLoading(false);
     }
 
     return (

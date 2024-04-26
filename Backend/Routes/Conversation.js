@@ -9,16 +9,15 @@ const router = express.Router();
 router.post("/sendMessage", async (req, res) => {
     //Conversation with person done before
     if (req.body.ConversationId) {
-        const {senderId,ConversationId,message}=req.body;
-        const Messages = await Message.create({ conversationId:ConversationId, senderId, text: message })
+        const {senderId,ConversationId,message,date}=req.body;
+        const Messages = await Message.create({ conversationId:ConversationId, senderId, text: message,date })
         Messages.save();
         res.json({ msg: "Message Sent Successfully" })
     }
     //New Conversation totally
     else {
         try {
-            const { senderId, receiverId, message } = req.body;
-            console.log(senderId, receiverId, message);
+            const { senderId, receiverId, message,date } = req.body;
             //Check if conversation with this sender and receiver exists or not
             let ConversationRoom = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });
             if(!ConversationRoom){
@@ -27,7 +26,7 @@ router.post("/sendMessage", async (req, res) => {
                 await ConversationRoom.save();
             }
             //Send Message
-            const Messages = await Message.create({ conversationId: ConversationRoom._id, senderId, text: message })
+            const Messages = await Message.create({ conversationId: ConversationRoom._id, senderId, text: message,date })
             Messages.save();
             res.json({ msg: "Message Sent Successfully" })
         } catch (error) {
