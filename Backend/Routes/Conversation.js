@@ -55,7 +55,7 @@ router.get("/fetchConversations/:userId", async (req, res) => {
         ConversationRoom.forEach((item, index) => {
             const { members } = item;
             const userNames = members.map((id) => {
-                const user = usersData.find((user) => user._id.toString() === id.toString());
+                const user = usersData.find((user) => user.id.toString() === id.toString());
                 return { id: user._id, name: user.name, username: user.username, profile: user.profile,conversationId:item._id };
             });            
             Allconversation.push(userNames);

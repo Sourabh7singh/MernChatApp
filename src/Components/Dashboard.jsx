@@ -14,11 +14,10 @@ import SearchUserMenu from './Menu/SearchUserMenu'
 import ShowProfile from './Menu/ShowProfile'
 const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
-    const { Users, fetchUsers, convertTo12HourFormat, ShowContextMenu, setShowContextMenu,
-        setUsers,
+    const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
-        , FetchMessages, messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount,
-        socket, setSocket, SelectedChatcompare, loading } = useContext(DashboardContext);
+        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount,
+        socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
     const navigate = useNavigate();
@@ -129,6 +128,25 @@ const Dashboard = () => {
         })
         setText("");
     }
+    const SendGroupMessage = async (e) => {
+        e.preventDefault();
+        const responce = await fetch(`${ServerUrl}/api/groups/sendmessage`, {
+            method: "POST",
+            headers: {
+                'Content-type': "application/json"
+            },
+            body: JSON.stringify({ text, groupId: CurrentChat?.id,senderId: userId })
+        });
+        const result = await responce.json();
+        if (!result.Success) {
+            toast("Please Try again in some time", { type: "info" });
+        }
+        else {
+            toast("Message Sent Successfully", { type: "success" });
+            setmessages([...messages, { text, senderId: userId, receiverId: CurrentChat?.id, date: Date.now() }])
+        }
+        
+    }
 
     const HandleCopyMessage = () => {
         navigator.clipboard.writeText(selectedMessage?.text);
@@ -223,7 +241,6 @@ const Dashboard = () => {
                             {Addusersmenu && <SearchUserMenu data={{ Section, HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu }} />}
                         </div>
                     </div>
-
                     <div className='search-bar w-full m-3 bg-slate-800 pl-2 pr-2 min-w-[260px] relative'>
                         <input type="text" className='w-full p-3 rounded-2xl' placeholder='Search...' />
                         <div className='cursor-pointer absolute' style={{ right: "15px", top: "10px" }}>
@@ -277,16 +294,12 @@ const Dashboard = () => {
                         <div role="status" className=" animate-pulse h-screen w-full">
                             <div className="h-9 bg-gray-200 rounded-full dark:bg-gray-700 left p-2 m-2 w-2/5"></div>
                             <div className="h-9 bg-gray-200 rounded-full dark:bg-gray-700 left p-2 m-2 block ml-auto w-2/5"></div>
-                            {/* <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-                            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"></div>
-                            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"></div>
-                            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"></div> */}
                         </div>
                     }
                     {ShowContextMenu && <CustomContextMenu data={{ HandleCopyMessage, HandleDeleteMessage }} />}
                 </div>
                 {CurrentChat !== "" && <div className="Send-Message relative">
-                    <form onSubmit={(e) => HandleSubmit(e)}>
+                    <form onSubmit={(e) => {Section == 'Chats' ? HandleSubmit(e) : SendGroupMessage(e)}}>
                         <input type="text" placeholder="Type your message here..." value={text} onChange={(e) => setText(e.target.value)} className=" p-2 h-12 bg-slate-100 border-0 focus:outline-none focus:ring-0 focus:shadow-none w-full" />
                         <label htmlFor="send" className='cursor-pointer absolute' style={{ right: "10px", top: "50%", transform: "translateY(-50%)" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

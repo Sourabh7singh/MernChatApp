@@ -7,6 +7,14 @@ const router = express.Router();
 router.post("/createGroup", async (req, res) => {
     const { groupName, members, admin } = req.body;
     try {
+        const userAdmin = await User.findById(admin).select("-password").select("-email").select("-date");
+        const newUser = {
+            id:userAdmin._id,
+            name:userAdmin.name,
+            username:userAdmin.username,
+            profile:userAdmin.profile
+        }
+        members.push(newUser);
         const newGroup = await Groups.create({ groupName, members, admin,profile:""});
         newGroup.save();
         res.json({ msg: "Group Created Successfully", group: newGroup,Success:true });
@@ -21,7 +29,7 @@ router.post("/sendmessage", async (req, res) => {
     try {
         const newMessage = await GroupsMessage.create({ senderId, groupId, text });
         newMessage.save();
-        res.json({ msg: "Message Sent Successfully" });
+        res.json({ msg: "Message Sent Successfully",Success:true });
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: "Some error occurred" });
@@ -31,7 +39,14 @@ router.post("/sendmessage", async (req, res) => {
 router.get("/getgroups/:userId", async (req, res) => {
     const { userId } = req.params;
     try {
-        const groups = await Groups.find({ members: { $in: userId } });
+        const user = await User.findById(userId);
+        const newUser = {
+            id: user._id,
+            name: user.name,
+            username: user.username,
+            profile: user.profile
+        }
+        const groups = await Groups.find({ members: {$in: newUser} });
         res.json(groups);
     } catch (error) {
         console.error(error);
