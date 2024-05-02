@@ -61,6 +61,16 @@ const Dashboard = () => {
                 toast("New Message")
             }
         })
+        if(Section==="Groups" && CurrentChat){
+            let data = {
+                groupId: CurrentChat?._id,
+                socketId: socket?.id
+            }
+            socket?.emit("joinGroup",data);
+        }
+        socket?.on("getGroupMessage", (data) => {
+            console.log(data);
+        })
         return () => { socket?.off("getMessage") }
     }, [socket, messages]);
 
@@ -130,20 +140,21 @@ const Dashboard = () => {
     }
     const SendGroupMessage = async (e) => {
         e.preventDefault();
+        socket.emit("sendGroupMessage", { text, senderId: userId, groupId: CurrentChat?._id, date: Date.now() })
         const responce = await fetch(`${ServerUrl}/api/groups/sendmessage`, {
             method: "POST",
             headers: {
                 'Content-type': "application/json"
             },
-            body: JSON.stringify({ text, groupId: CurrentChat?.id,senderId: userId })
+            body: JSON.stringify({ text, groupId: CurrentChat?._id,senderId: userId })
         });
         const result = await responce.json();
         if (!result.Success) {
             toast("Please Try again in some time", { type: "info" });
         }
         else {
-            toast("Message Sent Successfully", { type: "success" });
             setmessages([...messages, { text, senderId: userId, receiverId: CurrentChat?.id, date: Date.now() }])
+            setText("");
         }
         
     }

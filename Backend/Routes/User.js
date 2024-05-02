@@ -56,12 +56,14 @@ router.post("/login", [
             return res.json({ msg: "Invalid Credentials", Success: false })
         }
         //compare password using bcrypt
-        if (user.password === password) {
-            res.json({ msg: "Login Successfull", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
-        }
-        else {
-            res.json({ msg: "Invalid Credentials", Success: false })
-        }
+        bcrypt.compare(password,user.password, function(err, result) {
+            if (result) {
+                res.json({ msg: "Login Successfull", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
+            }
+            else {
+                res.json({ msg: "Invalid Credentials", Success: false })
+            }
+        });
     } catch (error) {
         console.error("Error", error);
         res.status(500).json({ msg: "Some error occurred", Success: false });

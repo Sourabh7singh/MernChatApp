@@ -39,9 +39,9 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('getMessages', async (data) => {
-        console.log(data);
-    })
+    // socket.on('getMessages', async (data) => {
+    //     console.log(data);
+    // })
 
     socket.on('disconnect', () => {
         // console.log("User Disconnected", socket.id);

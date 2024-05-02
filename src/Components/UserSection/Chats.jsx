@@ -3,8 +3,8 @@ import Avatar from '../../assets/MyProfile.png'
 import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
-    const { Conversations, setConversations, ConversationLoading
-        , FetchConversations, FetchMessages, CurrentChat, notificationCount, setNotificationCount, setCurrentChat, SelectedChatcompare } = useContext(DashboardContext);
+    const { Conversations, ConversationLoading
+        , FetchConversations, FetchMessages, CurrentChat,setCurrentChat } = useContext(DashboardContext);
     const [Users, setUsers] = useState([]);
     const ServerUrl = import.meta.env.VITE_SERVER_URL
 

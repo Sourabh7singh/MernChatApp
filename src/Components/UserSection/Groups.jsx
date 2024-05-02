@@ -11,7 +11,7 @@ const Groups = (props) => {
     const responce = await fetch(`${ServerUrl}/api/groups/getmessages/${group._id}`)
     const Messages = await responce.json();
     setmessages(Messages);
-    setLoading(false)
+    setLoading(false);
   }
   useEffect(() => {
     FetchGroups();
