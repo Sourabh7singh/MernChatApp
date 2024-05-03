@@ -25,10 +25,9 @@ router.post("/createGroup", async (req, res) => {
 });
 
 router.post("/sendmessage", async (req, res) => {
-    const { senderId, groupId, text } = req.body;
-    console.log(senderId,groupId,text);
+    const { senderId, groupId, text,date } = req.body;
     try {
-        const newMessage = await GroupsMessage.create({ senderId, groupId, text });
+        const newMessage = await GroupsMessage.create({ senderId, groupId, text,date });
         newMessage.save();
         res.json({ msg: "Message Sent Successfully", Success: true });
     } catch (error) {
@@ -58,6 +57,7 @@ router.get("/getmessages/:groupId", async (req, res) => {
             const { date, senderId, text, _id } = message;
             newMessages.push({ date, groupId, senderId, text, _id, name: user.name });
         }));
+        newMessages.sort((a, b) => a.date - b.date);
         res.json(newMessages);
     } catch (error) {
         console.error(error);

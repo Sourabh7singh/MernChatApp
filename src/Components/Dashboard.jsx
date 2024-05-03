@@ -70,8 +70,19 @@ const Dashboard = () => {
         }
         socket?.on("getGroupMessage", (data) => {
             console.log(data);
+            // if (messages.length === 0) { return };
+            if (CurrentChat._id === data.groupId) {
+                if(data?.senderId===userId){return};
+                setmessages(prev => ([...prev, data]));
+            }
+            else {
+                toast("New Message")
+            }
         })
-        return () => { socket?.off("getMessage") }
+        return () => { 
+            socket?.off("getMessage")
+            socket?.off("getGroupMessage")
+        }
     }, [socket, messages]);
 
     useEffect(() => {
@@ -146,7 +157,7 @@ const Dashboard = () => {
             headers: {
                 'Content-type': "application/json"
             },
-            body: JSON.stringify({ text, groupId: CurrentChat?._id,senderId: userId })
+            body: JSON.stringify({ text, groupId: CurrentChat?._id,senderId: userId, date: Date.now()})
         });
         const result = await responce.json();
         if (!result.Success) {

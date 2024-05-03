@@ -9,6 +9,7 @@ const port = process.env.PORT;
 
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
+const User = require('./Models/User');
 const server = createServer(app);
 const io = new Server(server,{
     cors:{
@@ -23,7 +24,6 @@ ConnectToMongo();
 let users = [];
 //Realtime Routes
 io.on('connection', (socket) => {
-    // console.log("New User Connected", socket.id);
     socket.on("addUser",(userId)=>{
         const isUserExist = users.find(user=>user.userId===userId);
         if(!isUserExist){
@@ -39,14 +39,17 @@ io.on('connection', (socket) => {
         }
     })
 
-    // socket.on('getMessages', async (data) => {
-    //     console.log(data);
-    // })
-
-    socket.on('disconnect', () => {
-        // console.log("User Disconnected", socket.id);
-        users = users.filter(user => user.socketId !== socket.id);
+    socket.on("joinGroup", (data) => {
+        socket.join(data.groupId);
     })
+
+    socket.on("sendGroupMessage", (data) => {
+        User.findById(data.senderId).then((user) => {
+            data.name = user.name
+            io.to(data.groupId).emit("getGroupMessage", data);
+        });
+    })
+
 })
 
 

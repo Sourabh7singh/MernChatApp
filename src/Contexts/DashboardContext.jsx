@@ -42,7 +42,7 @@ const DashboardProvider = ({ children }) => {
         })
         const Messages = await responce.json();
         setmessages(Messages);
-        setLoading(false)
+        setLoading(false);
     }
 
     const convertTo12HourFormat = (utcTime) => {
