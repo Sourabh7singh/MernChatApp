@@ -125,4 +125,5 @@ router.get("/searchusers", async (req, res) => {
         res.status(500).json({ msg: "Some error occurred" });
     }
 });
+
 module.exports = router;

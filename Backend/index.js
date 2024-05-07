@@ -35,7 +35,10 @@ io.on('connection', (socket) => {
     socket.on('send-message', (data) => {
         const existUser = users.find(user => user.userId === data.receiverId);
         if (existUser) {
-            io.to(existUser.socketId).emit("getMessage", data);
+            User.findById(data.senderId).then((user) => {
+                data.name = user.name
+                io.to(existUser.socketId).emit("getMessage", data);
+            })
         }
     })
 
@@ -56,6 +59,7 @@ io.on('connection', (socket) => {
 app.post('/', (req, res) => {
     res.json("Server running");  
 })
+
 app.use("/api/user",require('./Routes/User'));
 app.use("/api/conversation",require("./Routes/Conversation"))
 app.use("/api/groups",require("./Routes/Groups"))

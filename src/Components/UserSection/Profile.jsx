@@ -35,10 +35,6 @@ const Profile = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
-        // const formData = new FormData();
-        // formData.append('profilePicture', base64Image);
-
         try {
             const response = await fetch(`${ServerUrl}/api/user/updateProfile`, {
                 method: 'POST',

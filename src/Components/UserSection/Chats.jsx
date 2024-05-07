@@ -4,7 +4,7 @@ import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
-        , FetchConversations, FetchMessages, CurrentChat,setCurrentChat } = useContext(DashboardContext);
+        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat } = useContext(DashboardContext);
     const [Users, setUsers] = useState([]);
     const ServerUrl = import.meta.env.VITE_SERVER_URL
 
@@ -20,27 +20,26 @@ const Chats = (props) => {
     return (
         <>
             <div className="Available-Uses">
-                {!ConversationLoading &&
-                    Conversations.length===0 &&
-                    <div className="text-2xl font-bold text-center">No Chats to show</div>
-                }
-
-                {!ConversationLoading && 
-                Conversations.length > 0 ?
-                    Conversations.map((user, index) => {
-                        return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
-                            <div className="profile-image ml-2 mr-2">
-                                <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
-                            </div>
-                            <div className="details ml-2 mr-2">
-                                <div className="name font-serif text-lg">{user.name}</div>
-                                <div className="username font-serif text-lg">@{user.username}</div>
-                            </div>
-                        </div>
-                    })
-                     :
+                {!ConversationLoading ?
+                    <>
+                        {
+                            Conversations.length > 0 ?
+                                Conversations.map((user, index) => {
+                                    return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
+                                        <div className="profile-image ml-2 mr-2">
+                                            <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
+                                        </div>
+                                        <div className="details ml-2 mr-2">
+                                            <div className="name font-serif text-lg">{user.name}</div>
+                                            <div className="username font-serif text-lg">@{user.username}</div>
+                                        </div>
+                                    </div>
+                                })
+                                : <div className="text-2xl font-bold text-center">No Chats to show</div>
+                            }
+                    </>
+                    :
                     //Sekeleton loader
-
                     <div role="status" className="max-w-md p-4 space-y-4 border border-gray-200 divide-y divide-gray-200 rounded shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700">
                         <div className="flex items-center mt-4">
                             <svg className="w-10 h-10 me-3 text-gray-200 dark:text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -89,7 +88,6 @@ const Chats = (props) => {
                         </div>
                         <span className="sr-only">Loading...</span>
                     </div>
-
                 }
             </div >
         </>

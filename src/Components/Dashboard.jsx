@@ -57,8 +57,7 @@ const Dashboard = () => {
                 setmessages(prev => ([...prev, data]));
             }
             else {
-                console.log("Notification from other user");
-                toast("New Message")
+                toast(`New Message from ${data.name}`, { type: "info" });
             }
         })
         if(Section==="Groups" && CurrentChat){
@@ -70,7 +69,6 @@ const Dashboard = () => {
         }
         socket?.on("getGroupMessage", (data) => {
             console.log(data);
-            // if (messages.length === 0) { return };
             if (CurrentChat._id === data.groupId) {
                 if(data?.senderId===userId){return};
                 setmessages(prev => ([...prev, data]));
@@ -80,8 +78,8 @@ const Dashboard = () => {
             }
         })
         return () => { 
-            socket?.off("getMessage")
-            socket?.off("getGroupMessage")
+            socket?.off("getMessage");
+            socket?.off("getGroupMessage");
         }
     }, [socket, messages]);
 

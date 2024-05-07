@@ -18,6 +18,7 @@ const DashboardProvider = ({ children }) => {
     const [messages, setmessages] = useState([]);
     const [loading,setLoading] = useState(false);
     const[ConversationLoading,setConversationLoading] = useState(false);
+    const [GroupLoading,setGroupLoading] = useState(false);
     const [CurrentChat, setCurrentChat] = useState("");
     const [groups, setGroups] = useState([]);
     const [notificationCount, setNotificationCount] = useState([]);
@@ -58,10 +59,12 @@ const DashboardProvider = ({ children }) => {
         return formattedTime;
     }
     const FetchGroups = async () => {
+        setGroupLoading(true);
         const userid = JSON.parse(localStorage.getItem("user")).id;
         const result = await fetch(`${ServerUrl}/api/groups/getgroups/${userid}`)
         const responce = await result.json();
         setGroups(responce);
+        setGroupLoading(false);
     }
 
     const FetchConversations = async () => {
@@ -107,7 +110,9 @@ const DashboardProvider = ({ children }) => {
             loading,
             setLoading,
             ConversationLoading,
-            setConversationLoading
+            setConversationLoading,
+            GroupLoading,
+            setGroupLoading
         }}>
             {children}
         </DashboardContext.Provider>
