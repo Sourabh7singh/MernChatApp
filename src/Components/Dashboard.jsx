@@ -51,12 +51,13 @@ const Dashboard = () => {
             console.log("Active Users :>>", users);
         })
         socket?.on("getMessage", (data) => {
-            if (messages.length === 0) { return };
+            // if (messages.length === 0) { return };
             if (CurrentChat.id === data.senderId) {
                 console.log("Notification from current user", data.text);
                 setmessages(prev => ([...prev, data]));
             }
             else {
+                console.log("Notification from other user", data.text);
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
         })
@@ -68,7 +69,6 @@ const Dashboard = () => {
             socket?.emit("joinGroup",data);
         }
         socket?.on("getGroupMessage", (data) => {
-            console.log(data);
             if (CurrentChat._id === data.groupId) {
                 if(data?.senderId===userId){return};
                 setmessages(prev => ([...prev, data]));

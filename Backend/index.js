@@ -10,6 +10,7 @@ const port = process.env.PORT;
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 const User = require('./Models/User');
+const { log } = require('node:console');
 const server = createServer(app);
 const io = new Server(server,{
     cors:{
@@ -33,7 +34,9 @@ io.on('connection', (socket) => {
         }
     })
     socket.on('send-message', (data) => {
+        // console.log(data);
         const existUser = users.find(user => user.userId === data.receiverId);
+        console.log(existUser);
         if (existUser) {
             User.findById(data.senderId).then((user) => {
                 data.name = user.name
