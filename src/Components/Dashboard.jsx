@@ -119,8 +119,9 @@ const Dashboard = () => {
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() });
         let Data = {};
         if (messages.length === 0) {
-            //Call Fetch Conversations too
-            FetchConversations();
+            setTimeout(() => {
+                FetchConversations();
+            }, 1000);
             Data = {
                 senderId: userId,
                 message: text,

@@ -34,9 +34,7 @@ io.on('connection', (socket) => {
         }
     })
     socket.on('send-message', (data) => {
-        // console.log(data);
         const existUser = users.find(user => user.userId === data.receiverId);
-        console.log(existUser);
         if (existUser) {
             User.findById(data.senderId).then((user) => {
                 data.name = user.name
