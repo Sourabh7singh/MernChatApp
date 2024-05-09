@@ -61,23 +61,23 @@ const Dashboard = () => {
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
         })
-        if(Section==="Groups" && CurrentChat){
+        if (Section === "Groups" && CurrentChat) {
             let data = {
                 groupId: CurrentChat?._id,
                 socketId: socket?.id
             }
-            socket?.emit("joinGroup",data);
+            socket?.emit("joinGroup", data);
         }
         socket?.on("getGroupMessage", (data) => {
             if (CurrentChat._id === data.groupId) {
-                if(data?.senderId===userId){return};
+                if (data?.senderId === userId) { return };
                 setmessages(prev => ([...prev, data]));
             }
             else {
                 toast("New Message")
             }
         })
-        return () => { 
+        return () => {
             socket?.off("getMessage");
             socket?.off("getGroupMessage");
         }
@@ -86,7 +86,7 @@ const Dashboard = () => {
     useEffect(() => {
         messageRef.current?.scrollIntoView({ behavior: "instant" });
     }, [messages]);
-    
+
     const OpenContextMenu = (e, message) => {
         e.preventDefault();
         setCoordinates({ x: e.clientX, y: e.clientY });
@@ -156,7 +156,7 @@ const Dashboard = () => {
             headers: {
                 'Content-type': "application/json"
             },
-            body: JSON.stringify({ text, groupId: CurrentChat?._id,senderId: userId, date: Date.now()})
+            body: JSON.stringify({ text, groupId: CurrentChat?._id, senderId: userId, date: Date.now() })
         });
         const result = await responce.json();
         if (!result.Success) {
@@ -166,7 +166,7 @@ const Dashboard = () => {
             setmessages([...messages, { text, senderId: userId, receiverId: CurrentChat?.id, date: Date.now() }])
             setText("");
         }
-        
+
     }
 
     const HandleCopyMessage = () => {
@@ -244,7 +244,7 @@ const Dashboard = () => {
                 <ToastContainer />
             </div>
             {/* Left Section */}
-            <div className='Main Section bg-gray-300 h-screen overflow-y-auto w-1/4 min-w-[260px]'>
+            <div className='Main-Section bg-gray-300 h-screen overflow-y-auto w-1/4 min-w-[260px]' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
                 <div className='top-section p-2 flex justify-between flex-col items-center min-w-[260px] bg-slate-800 relative'>
                     <div className="Upper flex w-full justify-between">
                         <div className='sidebar-left m-2'>
@@ -278,9 +278,15 @@ const Dashboard = () => {
             </div>
 
             {/* Main-Chat screen */}
-            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-full w-3/4'>
+            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-full w-3/4' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
                 {ShowuserProfile && <ShowProfile data={{ CurrentChat }} />}
-                <div className='User-Details bg-slate-50 font-mono h-16 flex justify-between items-center'>
+                <div className='User-Details bg-slate-50 font-mono h-16 flex justify-evenly items-center'>
+                    <div className="BackButton" onClick={() => { setCurrentChat("") }}>
+                        <svg fill="#000000" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 330 330" xml:space="preserve">
+                            <path id="XMLID_92_" d="M111.213,165.004L250.607,25.607c5.858-5.858,5.858-15.355,0-21.213c-5.858-5.858-15.355-5.858-21.213,0.001l-150,150.004C76.58,157.211,75,161.026,75,165.004c0,3.979,1.581,7.794,4.394,10.607l150,149.996C232.322,328.536,236.161,330,240,330s7.678-1.464,10.607-4.394c5.858-5.858,5.858-15.355,0-21.213L111.213,165.004z" />
+                        </svg>
+                    </div>
                     <div className='User-Name flex items-center m-1 cursor-pointer' title='Show Profile' onClick={(e) => { setShowuserProfile(true) }}>
                         <div className='User-Profile-Image mr-2 ml-2'>
                             <img src={CurrentChat?.profile} className='rounded-full h-[50px] w-[50px]' alt="" onError={(e) => { e.target.src = MyProfile }} />
@@ -320,7 +326,7 @@ const Dashboard = () => {
                     {ShowContextMenu && <CustomContextMenu data={{ HandleCopyMessage, HandleDeleteMessage }} />}
                 </div>
                 {CurrentChat !== "" && <div className="Send-Message relative">
-                    <form onSubmit={(e) => {Section == 'Chats' ? HandleSubmit(e) : SendGroupMessage(e)}}>
+                    <form onSubmit={(e) => { Section == 'Chats' ? HandleSubmit(e) : SendGroupMessage(e) }}>
                         <input type="text" placeholder="Type your message here..." value={text} onChange={(e) => setText(e.target.value)} className=" p-2 h-12 bg-slate-100 border-0 focus:outline-none focus:ring-0 focus:shadow-none w-full" />
                         <label htmlFor="send" className='cursor-pointer absolute' style={{ right: "10px", top: "50%", transform: "translateY(-50%)" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -331,8 +337,8 @@ const Dashboard = () => {
                     </form>
                 </div>}
             </div> :
-                <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center'>
-                    <div className='text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>Web-Chat</div></div>}
+                <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
+                    <div className='Main-chat-Screen text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>Web-Chat</div></div>}
         </div>
     )
 }

@@ -68,3 +68,19 @@ table {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+@media screen and (max-width: 550px){
+	.Main-Section[data-bs-Chat="unset"]{
+		width: 100%;
+	}
+	.Main-chat-Screen[data-bs-Chat="unset"]{
+		display: none;
+	}
+	.Main-Section[data-bs-Chat="set"]{
+		display: none;
+	}
+	.Main-chat-Screen[data-bs-Chat="set"]{
+		width: 100%;
+	}
+	
+}
