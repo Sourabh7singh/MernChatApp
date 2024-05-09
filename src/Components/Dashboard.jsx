@@ -303,7 +303,7 @@ const Dashboard = () => {
                         </svg>
                     </div>
                 </div>
-                <div className="ChatScreen overflow-y-scroll" style={{ height: "calc(100vh - 7rem)" }}>
+                <div className="ChatScreen overflow-y-scroll" style={{ height: "calc(100svh - 7rem)" }}>
                     {!loading ? messages.map((msg, index) => {
                         return (
                             <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>

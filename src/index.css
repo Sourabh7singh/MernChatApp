@@ -70,9 +70,6 @@ table {
 }
 
 @media screen and (max-width: 550px){
-	.Main-Section,.Main-chat-Screen{
-		height: 98vh;
-	}
 	.Main-Section[data-bs-Chat="unset"]{
 		width: 100%;
 	}
