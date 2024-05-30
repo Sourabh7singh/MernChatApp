@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import MyProfile from '../../assets/MyProfile.png';
 import { toast } from 'react-toastify';
 
 const Profile = () => {
@@ -59,7 +58,7 @@ const Profile = () => {
     return (
         <div className='w-full gap-4 flex flex-col justify-center items-center pt-4'>
             <div className="relative profileImage flex justify-center items-center" title='Change Profile pic'>
-                <img src={user?.profile} className='h-32 w-32 rounded-full m-auto' alt="Profile Image" onError={(e) => { e.target.src = MyProfile }} />
+                <img src={user.profile} className='h-32 w-32 rounded-full m-auto' alt="Profile Image"/>
                 <label htmlFor="profilePicUpload">
                     <svg width="30px" height="30px" className='absolute bottom-0 right-0 cursor-pointer bg-white rounded-full m-2' viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 16C13.6569 16 15 14.6569 15 13C15 11.3431 13.6569 10 12 10C10.3431 10 9 11.3431 9 13C9 14.6569 10.3431 16 12 16Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

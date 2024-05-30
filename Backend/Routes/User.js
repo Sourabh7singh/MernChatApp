@@ -5,6 +5,7 @@ const User = require('../Models/User');
 const bcrypt = require('bcrypt');
 const { configDotenv } = require('dotenv');
 const cloudinary = require('cloudinary').v2;
+
 // Return "https" URLs by setting secure: true
 cloudinary.config({
     cloud_name: process.env.Cloud_name,
@@ -23,7 +24,7 @@ router.post("/signup", [
 ], async (req, res) => {
     const result = validationResult(req);
     if (result.isEmpty()) {
-        const { name, email, username, password, profile } = req.body;
+        const { name, email, username, password} = req.body;
         //check if user exists if not create one and return the result here
         try {
             let user = await User.findOne({ username });
@@ -31,10 +32,8 @@ router.post("/signup", [
                 res.json({ msg: "User Already Exist" })
             }
             else {
-                //Hash password and then save it
                 bcrypt.hash(password, saltRounds, async function (err, hash) {
-                    // Store hash in your password DB.
-                    const user = await User.create({ name, email, username, password: hash, profile })
+                    await User.create({ name, email, username, password: hash, profile:`https://avatar.iran.liara.run/public/boy?username=${username}`})
                     res.json({ msg: "User Registered Successfully" })
                 });
             }

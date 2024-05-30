@@ -64,5 +64,20 @@ router.get("/getmessages/:groupId", async (req, res) => {
         res.status(500).json({ msg: "Some error occurred" });
     }
 })
-
+router.delete("/deletegroup/:groupId/:userId", async (req, res) => {
+    const { groupId, userId } = req.params;
+    try {
+        const group = await Groups.findByIdAndDelete(groupId);
+        const user = await User.findById(group['admin']);
+        if (group['admin'] == userId) {
+            res.json({ msg: "Group Deleted Successfully", Success: true });
+        }
+        else {
+            res.json({ msg: "You are not authorized to delete this group", Success: false });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred" });
+    }
+})
 module.exports = router;

@@ -111,7 +111,12 @@ const Dashboard = () => {
             toast("Conversation Deleted Successfully");
         }
         else {
-            //For Group
+            const res = await fetch(`${ServerUrl}/api/groups/deletegroup/${CurrentChat?._id}/${userId}`, { method: "DELETE" })
+            const result = await res.json();
+            if (!result.Success) { return toast(result.msg, { type: "info" }) }
+            setCurrentChat(null);
+            FetchGroups();
+            toast("Group Deleted Successfully");
         }
     }
     const HandleSubmit = async (e) => {

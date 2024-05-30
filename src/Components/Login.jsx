@@ -34,7 +34,7 @@ const Login = (props) => {
     const responce = await result.json();
     setResponce(responce)
     setloading(false);
-    toast(responce.msg)
+    toast(responce.msg);
     if (responce.Success) {
       localStorage.setItem("user", JSON.stringify(responce.user))
       navigate("/")
@@ -73,7 +73,7 @@ const Login = (props) => {
             <p className="text-red-500 text-xs italic">Please choose a password.</p>
           </div>
           <div className="flex items-center justify-between p-2">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onClick={(e) => HandleSubmit(e)} onSubmit={(e) => HandleSubmit(e)} disabled={isLoading}>
+            <button className={`${!isLoading ? "bg-blue-500 hover:bg-blue-700" : "bg-blue-300"}  text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`} type="button" onClick={(e) => HandleSubmit(e)} onSubmit={(e) => HandleSubmit(e)} disabled={isLoading}>
               {isLogin ? "Login" : "Sign-in"}
             </button>
           </div>
