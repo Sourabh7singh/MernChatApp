@@ -16,7 +16,7 @@ const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
-        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount,
+        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount, FetchMessages,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -36,6 +36,12 @@ const Dashboard = () => {
     const [Addusersmenu, setAddusersmenu] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [ShowuserProfile, setShowuserProfile] = useState(false);
+    const [isLazyloading, setIsLazyloading] = useState(false);
+    const [newMessagesLoaded, setNewMessagesLoaded] = useState(false);
+    const [HasMoreMessages, setHasMoreMessages] = useState(true);
+    const ChatContainerRef = useRef();
+    const MessageTopRef = useRef();
+    const scrollPositionRef = useRef({ scrollTop: 0, scrollHeight: 0 });
     useEffect(() => {
         setCurrentChat(null);
     }, [Section]);
@@ -87,6 +93,45 @@ const Dashboard = () => {
         messageRef.current?.scrollIntoView({ behavior: "instant" });
     }, [messages]);
 
+
+    const handleLoadMessages = async () => {
+        if (ChatContainerRef.current) {
+            scrollPositionRef.current = {
+              scrollTop: ChatContainerRef.current.scrollTop,
+              scrollHeight: ChatContainerRef.current.scrollHeight,
+            };
+          }
+        setIsLazyloading(true);
+        const response = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({ senderId: userId, receiverId: CurrentChat?.id, before: messages[0].date })
+        });
+        const newMessages = await response.json();
+        setmessages(prevMessages => [...newMessages, ...prevMessages]);
+        setHasMoreMessages(newMessages.length === 20);
+        setIsLazyloading(false);
+    };
+
+    useEffect(() => {
+        // Adjust the scroll position after new messages are set
+        if (!loading && scrollPositionRef.current.scrollHeight > 0) {
+          requestAnimationFrame(() => {
+            if (ChatContainerRef.current) {
+              const scrollHeightAfter = ChatContainerRef.current.scrollHeight;
+              ChatContainerRef.current.scrollTop = scrollPositionRef.current.scrollTop + (scrollHeightAfter - scrollPositionRef.current.scrollHeight);
+            }
+          });
+        }
+      }, [messages]);
+
+    const handleScroll = (e) => {
+        if (e.target.scrollTop === 0 && HasMoreMessages && !isLazyloading) {
+            handleLoadMessages();
+        }
+    };
     const OpenContextMenu = (e, message) => {
         e.preventDefault();
         setCoordinates({ x: e.clientX, y: e.clientY });
@@ -94,7 +139,7 @@ const Dashboard = () => {
         setSelectedMessage(message);
     }
     const DateConversion = (date) => {
-        const date1 = new Date(Date(date));
+        const date1 = new Date(Number(date));
         const hours = date1.getHours();
         const minutes = date1.getMinutes();
         const meridiem = hours >= 12 ? "PM" : "AM";
@@ -308,7 +353,10 @@ const Dashboard = () => {
                         </svg>
                     </div>
                 </div>
-                <div className="ChatScreen overflow-y-scroll" style={{ height: "calc(100svh - 7rem)" }}>
+                <div className="ChatScreen overflow-y-scroll" onScroll={handleScroll} ref={ChatContainerRef} style={{ height: "calc(100svh - 7rem)" }}>
+                    {
+                        isLazyloading ? <div className="loader"></div> : null
+                    }
                     {!loading ? messages.map((msg, index) => {
                         return (
                             <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>
@@ -316,6 +364,7 @@ const Dashboard = () => {
                                     <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
                                     <div className="message ">
                                         <div className="text p-2">{msg.text}</div>
+                                        {console.log(msg.date)}
                                         <p className="time text-right" style={{ fontSize: "8px" }}>{DateConversion(msg.date)}</p>
                                     </div>
                                 </div>

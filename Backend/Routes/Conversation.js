@@ -69,13 +69,18 @@ router.get("/fetchConversations/:userId", async (req, res) => {
 
 router.post("/fetchMessages",async(req,res)=>{
     const {senderId,receiverId} = req.body;
+    const before = req.body.before?req.body.before:Date.now();
     try {
         const conversation = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });    
         if(!conversation){
             return res.json([]);
         }
         const conversationId = conversation._id;
-        const messages = await Message.find({conversationId})
+        const messages = await Message.find({
+            conversationId,
+            date: { $lte: before }
+        }).sort({ date: -1 }).limit(20);
+        messages.reverse();
         res.json(messages)
     } catch (error) {
         console.error(error);
