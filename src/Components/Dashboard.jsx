@@ -58,14 +58,16 @@ const Dashboard = () => {
         })
         socket?.on("getMessage", (data) => {
             console.log("Message Received :>>", data);
-            if (!CurrentChat) return toast(`New Message from ${data.name}`, { type: "info" });
+            if (!CurrentChat) {
+                toast(`New Message from ${data.name}`, { type: "info" });
+            } 
             else if (CurrentChat.id === data.senderId) {
                 setmessages(prev => ([...prev, data]));
-                CurrentChat.lastMessage.message = data.text
             }
             else{
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
+            CurrentChat.lastMessage.message = data.text
         })
         if (Section === "Groups" && CurrentChat) {
             let data = {
