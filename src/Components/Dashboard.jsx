@@ -16,7 +16,7 @@ const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
-        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount, FetchMessages,
+        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount, FetchMessages,setLastMessage,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -59,11 +59,11 @@ const Dashboard = () => {
         socket?.on("getMessage", (data) => {
             // if (messages.length === 0) { return };
             if (CurrentChat.id === data.senderId) {
-                console.log("Notification from current user", data.text);
                 setmessages(prev => ([...prev, data]));
+                CurrentChat.lastMessage.message = data.text
+                console.log("Last Message :>>", data);
             }
             else {
-                console.log("Notification from other user", data.text);
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
         })
@@ -167,6 +167,8 @@ const Dashboard = () => {
     const HandleSubmit = async (e) => {
         e.preventDefault();
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() });
+        CurrentChat.lastMessage.message = text
+        // setLastMessage("You : " + text);
         let Data = {};
         if (messages.length === 0) {
             setTimeout(() => {
@@ -294,7 +296,7 @@ const Dashboard = () => {
                 <ToastContainer />
             </div>
             {/* Left Section */}
-            <div className='Main-Section bg-gray-300 h-screen overflow-y-auto w-1/4 min-w-[260px]' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
+            <div className='Main-Section bg-gray-300 h-screen overflow-y-auto w-1/4 min-w-[260px]' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
                 <div className='top-section p-2 flex justify-between flex-col items-center min-w-[260px] bg-slate-800 relative'>
                     <div className="Upper flex w-full justify-between">
                         <div className='sidebar-left m-2'>
@@ -328,7 +330,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main-Chat screen */}
-            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-full w-3/4' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
+            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-full w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
                 {ShowuserProfile && <ShowProfile data={{ CurrentChat }} />}
                 <div className='User-Details bg-slate-50 font-mono h-16 flex justify-evenly items-center'>
                     <div className="BackButton" onClick={() => { setCurrentChat("") }}>
@@ -364,7 +366,6 @@ const Dashboard = () => {
                                     <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
                                     <div className="message ">
                                         <div className="text p-2">{msg.text}</div>
-                                        {console.log(msg.date)}
                                         <p className="time text-right" style={{ fontSize: "8px" }}>{DateConversion(msg.date)}</p>
                                     </div>
                                 </div>
@@ -391,7 +392,7 @@ const Dashboard = () => {
                     </form>
                 </div>}
             </div> :
-                <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center' data-bs-Chat={`${CurrentChat ? "set" : "unset"}`}>
+                <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
                     <div className='Main-chat-Screen text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>Web-Chat</div></div>}
         </div>
     )

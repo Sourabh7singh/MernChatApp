@@ -70,16 +70,16 @@ table {
 }
 
 @media screen and (max-width: 550px){
-	.Main-Section[data-bs-Chat="unset"]{
+	.Main-Section[data-bs-chat="unset"]{
 		width: 100%;
 	}
-	.Main-chat-Screen[data-bs-Chat="unset"]{
+	.Main-chat-Screen[data-bs-chat="unset"]{
 		display: none;
 	}
-	.Main-Section[data-bs-Chat="set"]{
+	.Main-Section[data-bs-chat="set"]{
 		display: none;
 	}
-	.Main-chat-Screen[data-bs-Chat="set"]{
+	.Main-chat-Screen[data-bs-chat="set"]{
 		width: 100%;
 	}
 	

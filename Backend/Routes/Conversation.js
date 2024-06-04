@@ -12,7 +12,10 @@ router.post("/sendMessage", async (req, res) => {
         const {senderId,ConversationId,message,date}=req.body;
         const Messages = await Message.create({ conversationId:ConversationId, senderId, text: message,date })
         Messages.save();
-        res.json({ msg: "Message Sent Successfully" })
+        const conversation = await Conversation.findById(ConversationId);
+        conversation.lastMessage = {message,senderId,date};
+        await conversation.save();
+        res.json({ msg: "Message Sent Successfully" });
     }
     //New Conversation totally
     else {
@@ -28,7 +31,10 @@ router.post("/sendMessage", async (req, res) => {
             //Send Message
             const Messages = await Message.create({ conversationId: ConversationRoom._id, senderId, text: message,date })
             Messages.save();
-            res.json({ msg: "Message Sent Successfully" })
+            //update last message
+            ConversationRoom.lastMessage = {message,senderId,date};
+            await ConversationRoom.save();
+            res.json({ msg: "Message Sent Successfully" });
         } catch (error) {
             res.status(500).json({ msg: "Some error occurred" });
             console.error(error);
@@ -56,7 +62,7 @@ router.get("/fetchConversations/:userId", async (req, res) => {
             const { members } = item;
             const userNames = members.map((id) => {
                 const user = usersData.find((user) => user.id.toString() === id.toString());
-                return { id: user._id, name: user.name, username: user.username, profile: user.profile,conversationId:item._id };
+                return { id: user._id, name: user.name, username: user.username, profile: user.profile,conversationId:item._id,lastMessage:item.lastMessage };
             });            
             Allconversation.push(userNames);
         });

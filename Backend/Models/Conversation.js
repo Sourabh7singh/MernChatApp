@@ -6,6 +6,10 @@ const Conversationschema = new Schema({
         type:Array,
         length:{min:2}
     },
+    lastMessage:{
+        type: Object,
+        length:{min:2}
+    },
     date:{
         type: Date,
         default: Date.now

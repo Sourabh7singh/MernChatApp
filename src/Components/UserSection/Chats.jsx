@@ -4,10 +4,8 @@ import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
-        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat } = useContext(DashboardContext);
-    const [Users, setUsers] = useState([]);
-    const ServerUrl = import.meta.env.VITE_SERVER_URL
-
+        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat} = useContext(DashboardContext);
+    
     useEffect(() => {
         FetchMessages(CurrentChat);
     }, [CurrentChat])
@@ -31,7 +29,13 @@ const Chats = (props) => {
                                         </div>
                                         <div className="details ml-2 mr-2">
                                             <div className="name font-serif text-lg">{user.name}</div>
-                                            <div className="username font-serif text-lg">@{user.username}</div>
+                                            <div className="username font-serif text-lg">
+                                                {
+                                                    user.lastMessage.senderId === userId
+                                                        ? "You: " + user.lastMessage.message
+                                                        : user.lastMessage.message
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 })
