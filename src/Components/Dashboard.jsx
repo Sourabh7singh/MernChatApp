@@ -57,13 +57,13 @@ const Dashboard = () => {
             console.log("Active Users :>>", users);
         })
         socket?.on("getMessage", (data) => {
-            // if (messages.length === 0) { return };
-            if (CurrentChat.id === data.senderId) {
+            console.log("Message Received :>>", data);
+            if (!CurrentChat) return toast(`New Message from ${data.name}`, { type: "info" });
+            else if (CurrentChat.id === data.senderId) {
                 setmessages(prev => ([...prev, data]));
                 CurrentChat.lastMessage.message = data.text
-                console.log("Last Message :>>", data);
             }
-            else {
+            else{
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
         })
@@ -80,7 +80,7 @@ const Dashboard = () => {
                 setmessages(prev => ([...prev, data]));
             }
             else {
-                toast("New Message")
+                toast("New Message");
             }
         })
         return () => {
