@@ -13,12 +13,24 @@
 
 ## Some Function of the application
 <ul>
-<li>
-The user is able to chat with other user in realtime.
-</li>
+    <li>
+        The user is able to chat with other user in realtime.
+    </li>
+    <li>
+        The MongoDB stores the messages sent and received by the user.
+    </li>
+    <li>
+        The User can freely change his/her profile image and name as well as email.
+    </li>
+        Every user is able to delete the messages sent by themselves only in any chat.
+    <li>
+        The user can create groups and chat in that group same like one to one chat it inludes realtime chatting and non-realtime storage of messages.
+    </li>
+    <li>
+        The user who creates the group is admin of that group and has the authority to delete the group. 
+    </li>
 </ul>
-####  The MongoDB stores the messages sent and received by the user. The User can freely change his/her profile image and name as well as email. Every user is able to delete the messages sent by themselves only in any chat.
-#### The user can create groups and chat in that group same like one to one chat it inludes realtime chatting and non-realtime storage of messages. The user create the group is admin of that group and has the authority to delete the group. 
+
 
 # FrontEnd Env file structure
 #### VITE_SERVER_URL = ....
