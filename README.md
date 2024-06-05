@@ -6,8 +6,15 @@
 ![Home Screen](image.png)
 ## Chat Screen
 ![Chat Screen](image-1.png)
+## Signup/Login Page
+![Login Screen](image-2.png)
 ## Profile Section
-![Profile Section](image-2.png)
+![Profile Section](image-3.png)
+
+## Some Function of the application
+#### The user is able to chat with other user in realtime. The MongoDB stores the messages sent and received by the user. The User can freely change his/her profile image and name as well as email. Every user is able to delete the messages sent by themselves only in any chat.
+#### The user can create groups and chat in that group same like one to one chat it inludes realtime chatting and non-realtime storage of messages. The user create the group is admin of that group and has the authority to delete the group. 
+
 # FrontEnd Env file structure
 #### VITE_SERVER_URL = ....
 #### during development the link can be the url of the backend server, during the production it needs the link of the server hosted.
