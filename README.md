@@ -12,7 +12,12 @@
 ![Profile Section](image-3.png)
 
 ## Some Function of the application
-#### The user is able to chat with other user in realtime. The MongoDB stores the messages sent and received by the user. The User can freely change his/her profile image and name as well as email. Every user is able to delete the messages sent by themselves only in any chat.
+<ul>
+<li>
+The user is able to chat with other user in realtime.
+</li>
+</ul>
+####  The MongoDB stores the messages sent and received by the user. The User can freely change his/her profile image and name as well as email. Every user is able to delete the messages sent by themselves only in any chat.
 #### The user can create groups and chat in that group same like one to one chat it inludes realtime chatting and non-realtime storage of messages. The user create the group is admin of that group and has the authority to delete the group. 
 
 # FrontEnd Env file structure
