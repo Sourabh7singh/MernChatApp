@@ -30,11 +30,7 @@ const Chats = (props) => {
                                         <div className="details ml-2 mr-2">
                                             <div className="name font-serif text-lg">{user.name}</div>
                                             <div className="username font-serif text-lg">
-                                                {
-                                                    user.lastMessage.senderId === userId
-                                                        ? "You: " + user.lastMessage.message
-                                                        : user.lastMessage.message
-                                                }
+                                                {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
                                             </div>
                                         </div>
                                     </div>
