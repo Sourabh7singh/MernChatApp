@@ -169,8 +169,6 @@ const Dashboard = () => {
     const HandleSubmit = async (e) => {
         e.preventDefault();
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() });
-        CurrentChat.lastMessage.message = text
-        // setLastMessage("You : " + text);
         let Data = {};
         if (messages.length === 0) {
             setTimeout(() => {
@@ -201,6 +199,7 @@ const Dashboard = () => {
             body: JSON.stringify(Data)
         })
         setText("");
+        CurrentChat.lastMessage.message = text
     }
     const SendGroupMessage = async (e) => {
         e.preventDefault();
