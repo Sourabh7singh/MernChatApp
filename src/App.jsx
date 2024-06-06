@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Dashboard from './Components/Dashboard'
 import './index.css'
 import Login from './Components/Login'
-import DashboardProvider from './Contexts/DashboardContext'
 
 function App() {
   return (
