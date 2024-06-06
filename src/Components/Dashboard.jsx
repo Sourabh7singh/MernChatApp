@@ -331,7 +331,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main-Chat screen */}
-            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-full w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
+            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 h-screen w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
                 {ShowuserProfile && <ShowProfile data={{ CurrentChat }} />}
                 <div className='User-Details bg-slate-50 font-mono h-16 flex justify-evenly items-center'>
                     <div className="BackButton" onClick={() => { setCurrentChat("") }}>
@@ -356,7 +356,7 @@ const Dashboard = () => {
                         </svg>
                     </div>
                 </div>
-                <div className="ChatScreen overflow-y-scroll" onScroll={handleScroll} ref={ChatContainerRef} style={{ height: "calc(100svh - 7rem)" }}>
+                <div className="ChatScreen overflow-y-scroll" onScroll={handleScroll} ref={ChatContainerRef} style={{ height: "calc(100vh - 7rem)" }}>
                     {
                         isLazyloading ? <div className="loader"></div> : null
                     }
