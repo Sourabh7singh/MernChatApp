@@ -28,8 +28,14 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
+html{
+	height: --webkit-fill-available;
+	}
 body {
 	line-height: 1;
+}
+.Main-chat-Screen{
+	height: --webkit-fill-available;
 }
 ol, ul {
 	list-style: none;

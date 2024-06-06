@@ -121,18 +121,18 @@ router.post("/deleteMessage",async(req,res)=>{
     }
 })
 
-// Groups
-router.post("/createGroup", async (req, res) => {
-    const { name,members,admin } = req.body;
-    try {
-        const newGroup = await Groups.create({ name,members,admin });
-        newGroup.save();
-        res.json({ msg: "Group Created Successfully",group:newGroup });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: "Some error occurred" });
-    }
-});
+// // Groups
+// router.post("/createGroup", async (req, res) => {
+//     const { name,members,admin } = req.body;
+//     try {
+//         const newGroup = await Groups.create({ name,members,admin });
+//         newGroup.save();
+//         res.json({ msg: "Group Created Successfully",group:newGroup });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ msg: "Some error occurred" });
+//     }
+// });
 
 
 module.exports = router;
