@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 })
 
 
-app.post('/', (req, res) => {
+app.get('/', (req, res) => {
     res.json("Server running");  
 })
 

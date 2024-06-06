@@ -73,6 +73,11 @@ table {
 }
 
 @media screen and (max-width: 550px){
+	.User-Details{
+		position: fixed;
+		top: 0;
+		width: 100%;
+	}
 	.Main-Section[data-bs-chat="unset"]{
 		width: 100%;
 	}
@@ -84,6 +89,14 @@ table {
 	}
 	.Main-chat-Screen[data-bs-chat="set"]{
 		width: 100%;
+	}
+	.Send-Message{
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+	}
+	.ChatScreen{
+		margin-top: 4rem;
 	}
 	
 }
