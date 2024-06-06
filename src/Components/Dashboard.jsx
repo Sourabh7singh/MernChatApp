@@ -331,7 +331,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main-Chat screen */}
-            {CurrentChat ? <div className='Main-chat-Screen h-full bg-gray-500 w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`} style={{height:"--webkit-fill-available"}}>
+            {CurrentChat ? <div className='Main-chat-Screen bg-gray-500 w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`} style={{height:"--webkit-fill-available"}}>
                 {ShowuserProfile && <ShowProfile data={{ CurrentChat }} />}
                 <div className='User-Details bg-slate-50 font-mono h-16 flex justify-evenly items-center'>
                     <div className="BackButton" onClick={() => { setCurrentChat("") }}>
