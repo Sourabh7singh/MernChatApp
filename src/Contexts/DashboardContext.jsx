@@ -23,6 +23,7 @@ const DashboardProvider = ({ children }) => {
     const [groups, setGroups] = useState([]);
     const [notificationCount, setNotificationCount] = useState([]);
     const [searchUsers, setSearchUsers] = useState("");
+    const [ActiveUsers, setActiveUsers] = useState([]);
 
     //Functions
     const fetchUsers = async () => {
@@ -115,6 +116,8 @@ const DashboardProvider = ({ children }) => {
             setGroupLoading,
             searchUsers,
             setSearchUsers,
+            ActiveUsers,
+            setActiveUsers
         }}>
             {children}
         </DashboardContext.Provider>

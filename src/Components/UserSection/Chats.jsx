@@ -5,8 +5,9 @@ const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
         , FetchConversations, FetchMessages, CurrentChat, setCurrentChat,searchUsers,
-        setSearchUsers,} = useContext(DashboardContext);
+        ActiveUsers,setActiveUsers,} = useContext(DashboardContext);
     
+        console.log("Activer users",ActiveUsers);
     useEffect(() => {
         FetchMessages(CurrentChat);
     }, [CurrentChat])
@@ -35,10 +36,11 @@ const Chats = (props) => {
                                                 {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
                                             </div>
                                         </div>
+                                        {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
                                     </div>
                                     }
                                     else{
-                                    return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
+                                        return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
                                         <div className="profile-image ml-2 mr-2">
                                             <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
                                         </div>
@@ -48,6 +50,7 @@ const Chats = (props) => {
                                                 {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
                                             </div>
                                         </div>
+                                        {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
                                     </div>
                                     }
                                 })

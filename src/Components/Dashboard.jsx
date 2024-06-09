@@ -16,7 +16,8 @@ const Dashboard = () => {
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
         , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups,searchUsers,
-        setSearchUsers,
+        setActiveUsers,
+        setSearchUsers,ActiveUsers,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -38,10 +39,10 @@ const Dashboard = () => {
     const [ShowuserProfile, setShowuserProfile] = useState(false);
     const [isLazyloading, setIsLazyloading] = useState(false);
     const [HasMoreMessages, setHasMoreMessages] = useState(true);
+    
 
     const ChatContainerRef = useRef();
     const scrollPositionRef = useRef({ scrollTop: 0, scrollHeight: 0 });
-
     useEffect(() => {
         setCurrentChat(null);
     }, [Section]);
@@ -55,17 +56,21 @@ const Dashboard = () => {
         socket?.emit('addUser', userId);
         socket?.on("getUsers", users => {
             console.log("Active Users :>>", users);
+            setActiveUsers(prev=>[]);
+            users.map((user)=>{
+                setActiveUsers(prev => ([...prev, user.userId]));
+            })
+            // setActiveUsers(users);
         })
         socket?.on("getMessage", (data) => {
-            console.log("Message Received :>>", data);
             if (!CurrentChat) {
-                toast(`New Message from ${data.name}`, { type: "info" });
+                return toast(`New Message from ${data.name}`, { type: "info" });
             }
             else if (CurrentChat.id === data.senderId) {
                 setmessages(prev => ([...prev, data]));
             }
             else {
-                toast(`New Message from ${data.name}`, { type: "info" });
+                return toast(`New Message from ${data.name}`, { type: "info" });
             }
             CurrentChat.lastMessage.message = data.text
         })
