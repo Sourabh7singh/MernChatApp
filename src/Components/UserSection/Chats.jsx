@@ -4,7 +4,8 @@ import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
-        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat} = useContext(DashboardContext);
+        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat,searchUsers,
+        setSearchUsers,} = useContext(DashboardContext);
     
     useEffect(() => {
         FetchMessages(CurrentChat);
@@ -23,6 +24,20 @@ const Chats = (props) => {
                         {
                             Conversations.length > 0 ?
                                 Conversations.map((user, index) => {
+                                    if (searchUsers!==""){
+                                    return user?.name.toLowerCase().includes(searchUsers) && <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
+                                        <div className="profile-image ml-2 mr-2">
+                                            <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
+                                        </div>
+                                        <div className="details ml-2 mr-2">
+                                            <div className="name font-serif text-lg">{user.name}</div>
+                                            <div className="username font-serif text-lg">
+                                                {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                    else{
                                     return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
                                         <div className="profile-image ml-2 mr-2">
                                             <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
@@ -34,6 +49,7 @@ const Chats = (props) => {
                                             </div>
                                         </div>
                                     </div>
+                                    }
                                 })
                                 : <div className="text-2xl font-bold text-center">No Chats to show</div>
                             }

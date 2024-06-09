@@ -3,7 +3,8 @@ import Avatar from '../../assets/MyProfile.png'
 import { DashboardContext } from '../../Contexts/DashboardContext';
 const Groups = (props) => {
   const { setmessages, setCurrentChat } = props.data;
-  const { FetchGroups, groups, setLoading, GroupLoading } = useContext(DashboardContext);
+  const { FetchGroups, groups, setLoading, GroupLoading,searchUsers,
+    setSearchUsers, } = useContext(DashboardContext);
   const ServerUrl = import.meta.env.VITE_SERVER_URL;
   const FetchGroupMessages = async (group) => {
     setLoading(true)
@@ -26,6 +27,17 @@ const Groups = (props) => {
               <>
                 {groups.length > 0 ?
                   groups.map((group) => {
+                    if (searchUsers!=="") {
+                    return group.groupName.toLowerCase().includes(searchUsers) && <div key={group._id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { FetchGroupMessages(group) }}>
+                      <div className="Groups-Image ml-2 mr-2">
+                        <img src={group.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
+                      </div>
+                      <div className="details ml-2 mr-2">
+                        <div className="Group font-serif text-lg">{group.groupName}</div>
+                      </div>
+                    </div>
+                    }
+                    else{
                     return <div key={group._id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { FetchGroupMessages(group) }}>
                       <div className="Groups-Image ml-2 mr-2">
                         <img src={group.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
@@ -34,6 +46,7 @@ const Groups = (props) => {
                         <div className="Group font-serif text-lg">{group.groupName}</div>
                       </div>
                     </div>
+                    }
                   }) : <div className="text-2xl font-bold text-center">No Groups Available</div>
                 }
               </>

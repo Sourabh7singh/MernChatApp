@@ -22,7 +22,7 @@ const DashboardProvider = ({ children }) => {
     const [CurrentChat, setCurrentChat] = useState("");
     const [groups, setGroups] = useState([]);
     const [notificationCount, setNotificationCount] = useState([]);
-    const [LastMessage,setLastMessage] = useState("");
+    const [searchUsers, setSearchUsers] = useState("");
 
     //Functions
     const fetchUsers = async () => {
@@ -113,6 +113,8 @@ const DashboardProvider = ({ children }) => {
             setConversationLoading,
             GroupLoading,
             setGroupLoading,
+            searchUsers,
+            setSearchUsers,
         }}>
             {children}
         </DashboardContext.Provider>

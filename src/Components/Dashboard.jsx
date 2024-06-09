@@ -7,7 +7,6 @@ import MyProfile from '../assets/MyProfile.png'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Avatar from '../assets/MyProfile.png'
 import { DashboardContext } from '../Contexts/DashboardContext'
 import OptionMenu from './Menu/OptionMenu'
 import SearchUserMenu from './Menu/SearchUserMenu'
@@ -16,7 +15,8 @@ const Dashboard = () => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
-        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, setNotificationCount, FetchMessages,setLastMessage,
+        , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups,searchUsers,
+        setSearchUsers,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -37,11 +37,11 @@ const Dashboard = () => {
     const [showMenu, setShowMenu] = useState(false);
     const [ShowuserProfile, setShowuserProfile] = useState(false);
     const [isLazyloading, setIsLazyloading] = useState(false);
-    const [newMessagesLoaded, setNewMessagesLoaded] = useState(false);
     const [HasMoreMessages, setHasMoreMessages] = useState(true);
+
     const ChatContainerRef = useRef();
-    const MessageTopRef = useRef();
     const scrollPositionRef = useRef({ scrollTop: 0, scrollHeight: 0 });
+
     useEffect(() => {
         setCurrentChat(null);
     }, [Section]);
@@ -60,11 +60,11 @@ const Dashboard = () => {
             console.log("Message Received :>>", data);
             if (!CurrentChat) {
                 toast(`New Message from ${data.name}`, { type: "info" });
-            } 
+            }
             else if (CurrentChat.id === data.senderId) {
                 setmessages(prev => ([...prev, data]));
             }
-            else{
+            else {
                 toast(`New Message from ${data.name}`, { type: "info" });
             }
             CurrentChat.lastMessage.message = data.text
@@ -99,10 +99,10 @@ const Dashboard = () => {
     const handleLoadMessages = async () => {
         if (ChatContainerRef.current) {
             scrollPositionRef.current = {
-              scrollTop: ChatContainerRef.current.scrollTop,
-              scrollHeight: ChatContainerRef.current.scrollHeight,
+                scrollTop: ChatContainerRef.current.scrollTop,
+                scrollHeight: ChatContainerRef.current.scrollHeight,
             };
-          }
+        }
         setIsLazyloading(true);
         const response = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
             method: 'POST',
@@ -120,14 +120,14 @@ const Dashboard = () => {
     useEffect(() => {
         // Adjust the scroll position after new messages are set
         if (!loading && scrollPositionRef.current.scrollHeight > 0) {
-          requestAnimationFrame(() => {
-            if (ChatContainerRef.current) {
-              const scrollHeightAfter = ChatContainerRef.current.scrollHeight;
-              ChatContainerRef.current.scrollTop = scrollPositionRef.current.scrollTop + (scrollHeightAfter - scrollPositionRef.current.scrollHeight);
-            }
-          });
+            requestAnimationFrame(() => {
+                if (ChatContainerRef.current) {
+                    const scrollHeightAfter = ChatContainerRef.current.scrollHeight;
+                    ChatContainerRef.current.scrollTop = scrollPositionRef.current.scrollTop + (scrollHeightAfter - scrollPositionRef.current.scrollHeight);
+                }
+            });
         }
-      }, [messages]);
+    }, [messages]);
 
     const handleScroll = (e) => {
         if (e.target.scrollTop === 0 && HasMoreMessages && !isLazyloading) {
@@ -316,11 +316,11 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className='search-bar w-full m-3 bg-slate-800 pl-2 pr-2 min-w-[260px] relative'>
-                        <input type="text" className='w-full p-3 rounded-2xl' placeholder='Search...' />
+                        <input type="text" className='w-full p-3 rounded-2xl' placeholder='Search...' onChange={(e) => { setSearchUsers(e.target.value) }} value={searchUsers}/>
                         <div className='cursor-pointer absolute' style={{ right: "15px", top: "10px" }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            {searchUsers && <svg width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={() => { setSearchUsers("") }}>
+                                <path d="M6.96967 16.4697C6.67678 16.7626 6.67678 17.2374 6.96967 17.5303C7.26256 17.8232 7.73744 17.8232 8.03033 17.5303L6.96967 16.4697ZM13.0303 12.5303C13.3232 12.2374 13.3232 11.7626 13.0303 11.4697C12.7374 11.1768 12.2626 11.1768 11.9697 11.4697L13.0303 12.5303ZM11.9697 11.4697C11.6768 11.7626 11.6768 12.2374 11.9697 12.5303C12.2626 12.8232 12.7374 12.8232 13.0303 12.5303L11.9697 11.4697ZM18.0303 7.53033C18.3232 7.23744 18.3232 6.76256 18.0303 6.46967C17.7374 6.17678 17.2626 6.17678 16.9697 6.46967L18.0303 7.53033ZM13.0303 11.4697C12.7374 11.1768 12.2626 11.1768 11.9697 11.4697C11.6768 11.7626 11.6768 12.2374 11.9697 12.5303L13.0303 11.4697ZM16.9697 17.5303C17.2626 17.8232 17.7374 17.8232 18.0303 17.5303C18.3232 17.2374 18.3232 16.7626 18.0303 16.4697L16.9697 17.5303ZM11.9697 12.5303C12.2626 12.8232 12.7374 12.8232 13.0303 12.5303C13.3232 12.2374 13.3232 11.7626 13.0303 11.4697L11.9697 12.5303ZM8.03033 6.46967C7.73744 6.17678 7.26256 6.17678 6.96967 6.46967C6.67678 6.76256 6.67678 7.23744 6.96967 7.53033L8.03033 6.46967ZM8.03033 17.5303L13.0303 12.5303L11.9697 11.4697L6.96967 16.4697L8.03033 17.5303ZM13.0303 12.5303L18.0303 7.53033L16.9697 6.46967L11.9697 11.4697L13.0303 12.5303ZM11.9697 12.5303L16.9697 17.5303L18.0303 16.4697L13.0303 11.4697L11.9697 12.5303ZM13.0303 11.4697L8.03033 6.46967L6.96967 7.53033L11.9697 12.5303L13.0303 11.4697Z" fill="#000000" />
+                            </svg>}
                         </div>
                     </div>
                 </div>
@@ -331,7 +331,7 @@ const Dashboard = () => {
             </div>
 
             {/* Main-Chat screen */}
-            {CurrentChat ? <div className='Main-chat-Screen h-screen bg-gray-500 w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`} style={{height:"-webkit-fill-available"}}>
+            {CurrentChat ? <div className='Main-chat-Screen h-screen bg-gray-500 w-3/4' data-bs-chat={`${CurrentChat ? "set" : "unset"}`} style={{ height: "-webkit-fill-available" }}>
                 {ShowuserProfile && <ShowProfile data={{ CurrentChat }} />}
                 <div className='User-Details bg-slate-50 font-mono h-16 flex justify-evenly items-center'>
                     <div className="BackButton" onClick={() => { setCurrentChat("") }}>
@@ -340,7 +340,7 @@ const Dashboard = () => {
                             <path id="XMLID_92_" d="M111.213,165.004L250.607,25.607c5.858-5.858,5.858-15.355,0-21.213c-5.858-5.858-15.355-5.858-21.213,0.001l-150,150.004C76.58,157.211,75,161.026,75,165.004c0,3.979,1.581,7.794,4.394,10.607l150,149.996C232.322,328.536,236.161,330,240,330s7.678-1.464,10.607-4.394c5.858-5.858,5.858-15.355,0-21.213L111.213,165.004z" />
                         </svg>
                     </div>
-                    <div className='User-Name flex items-center m-1 cursor-pointer' title='Show Profile' onClick={(e) => { setShowuserProfile(true) }}>
+                    <div className='User-Name flex items-center m-1 cursor-pointer' title='Show Profile' onClick={(e) => { setShowuserProfile(!ShowuserProfile) }}>
                         <div className='User-Profile-Image mr-2 ml-2'>
                             <img src={CurrentChat?.profile} className='rounded-full h-[50px] w-[50px]' alt="" onError={(e) => { e.target.src = MyProfile }} />
                         </div>
@@ -392,7 +392,7 @@ const Dashboard = () => {
                         <button type="submit" id='send' className="d-none" disabled={text.length === 0}></button>
                     </form>
                 </div>}
-                </div> :
+            </div> :
                 <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
                     <div className='Main-chat-Screen text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>Web-Chat</div></div>}
         </div>

@@ -8,8 +8,9 @@ const ShowProfile = (props) => {
         <img src={CurrentChat?.profile} className='w-full h-full rounded-full' alt="" onError={(e)=>{e.target.src=Avatar}}/>
       </div>
       <div className='text-white font-sans m-4'>
-        <div className='name '>Name: {CurrentChat.name}</div>
-        <div className='username'>Username: {CurrentChat?.username}</div>
+        <div className='name '>Name: {CurrentChat.name?CurrentChat.name:CurrentChat.groupName}</div>
+        {CurrentChat.groupName?<div className='username'>Members: {CurrentChat?.members?.length}</div>:<div className='username'>Username: {CurrentChat?.username}</div>}
+        {CurrentChat.groupName?<div className='Members'>{CurrentChat?.members.map((member)=>{return member.name+","})}</div>:null}
       </div>
     </div>
   )
