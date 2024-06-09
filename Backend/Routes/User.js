@@ -49,7 +49,6 @@ router.post("/login", [
     body('password').exists().isLength({ min: 7 })
 ], async (req, res) => {
     const { username, password } = req.body;
-    console.log(username, password);
     try {
         const user = await User.findOne({ username })
         if (!user) {
