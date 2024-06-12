@@ -9,8 +9,7 @@
 ## Signup/Login Page
 ![Login Screen](image-2.png)
 ## Profile Section
-![Profile Section](image-3.png)
-
+![Profile](image-3.png)
 ## Some Function of the application
 <ul>
     <li>
