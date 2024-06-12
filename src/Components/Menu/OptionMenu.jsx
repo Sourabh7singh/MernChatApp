@@ -1,7 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const OptionMenu = (props) => {
     const { setSection, Section, HandleCreate, setShowMenu } = props.data;
+    const navigate = useNavigate();
     return (
         <div className="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 absolute top-10 right-10">
             <div className="closebtn absolute right-0 top-0 flex justify-end  text-white cursor-pointer" onClick={() => setShowMenu(false)}>
@@ -14,6 +16,7 @@ const OptionMenu = (props) => {
                 <li className="block px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => {setSection("Groups"),setShowMenu(false)}} >Groups</li>
                 <li className="block px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => HandleCreate()} >Create New {`${Section === 'Groups' ? 'Group' : 'Conversation'}`}</li>
                 <li className="block px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>{setSection("Profile"),setShowMenu(false)}}>Profile</li>
+                <li className="block px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>{localStorage.removeItem("user"),navigate("/login")}}>Log Out</li>
             </ul>
         </div>
     )
