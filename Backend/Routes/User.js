@@ -60,21 +60,16 @@ router.post("/login", [
             return res.json({ msg: "Invalid Credentials", Success: false })
         }
         //compare password using bcrypt
-        bcrypt.compare(password,user.password, function(err, result) {
+        bcrypt.compare(password,user.password,async function(err, result) {
             if (result) {
                 if(!user.verified){
-                    Token.findOne({ userId: user._id }).then((token) => {
-                        if (!token) {
-                            const newToken = new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
-                            const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${newToken.token}`;
-                            SendEmail(user.email, "Verify Your Email", url);
-                            }
-                        else{
-                            const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                            SendEmail(user.email, "Verify Your Email", url);    
-                        }
-                        res.json({ msg: "Verification Link has been sent to your email please verify your account", Success: false})
-                    })
+                    let token = await Token.findOne({ userId: user._id });
+                    if (!token) {
+                        token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
+                    }
+                    const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
+                    await SendEmail(user.email, "Verify Your Email", url);    
+                    res.json({ msg: "Verification Link has been sent to your email please verify your account", Success: false});
                 }
                 else{
                     res.json({ msg: "Login Successful", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
@@ -150,18 +145,18 @@ router.get("/:id/verify/:token", async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(400).send({ msg: "Invalid link" });
+            return res.status(400).send("Invalid link");
         }
         const token = await Token.findOne({
             userId: user._id,
             token: req.params.token
         });
         if (!token) {
-            return res.status(400).send({ msg: "Invalid link" });
+            return res.status(400).send("Invalid link");
         }
         await User.updateOne({ _id: user._id }, { verified: true });
         await Token.deleteOne({ _id: token._id });
-        res.send({ msg: "Email verified successfully" });
+        res.send("Email verified successfully");
     } catch (error) {
         console.error(error);
         res.status(500).send({ msg: "Some error occurred" });
