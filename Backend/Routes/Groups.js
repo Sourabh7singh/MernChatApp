@@ -6,6 +6,12 @@ const router = express.Router();
 
 router.post("/createGroup", async (req, res) => {
     const { groupName, members, admin } = req.body;
+    if(!groupName || !members || !admin){
+        return res.json({ msg: "Please fill all the fields", Success: false });
+    }
+    if(members.length < 2){
+        return res.json({ msg: "Group should have atleast 2 members", Success: false });
+    }
     try {
         const userAdmin = await User.findById(admin).select("-password").select("-email").select("-date");
         const newUser = {

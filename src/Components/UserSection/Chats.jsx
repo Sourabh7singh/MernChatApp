@@ -4,10 +4,8 @@ import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = (props) => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
-        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat,searchUsers,
-        ActiveUsers,setActiveUsers,} = useContext(DashboardContext);
-    
-        console.log("Activer users",ActiveUsers);
+        , FetchConversations, FetchMessages, CurrentChat, setCurrentChat, searchUsers,
+        ActiveUsers, setActiveUsers, } = useContext(DashboardContext);
     useEffect(() => {
         FetchMessages(CurrentChat);
     }, [CurrentChat])
@@ -25,37 +23,37 @@ const Chats = (props) => {
                         {
                             Conversations.length > 0 ?
                                 Conversations.map((user, index) => {
-                                    if (searchUsers!==""){
-                                    return user?.name.toLowerCase().includes(searchUsers) && <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
-                                        <div className="profile-image ml-2 mr-2">
-                                            <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
-                                        </div>
-                                        <div className="details ml-2 mr-2">
-                                            <div className="name font-serif text-lg">{user.name}</div>
-                                            <div className="username font-serif text-lg">
-                                                {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
+                                    if (searchUsers !== "") {
+                                        return user?.name.toLowerCase().includes(searchUsers) && <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
+                                            <div className="profile-image ml-2 mr-2">
+                                                <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
                                             </div>
+                                            <div className="details ml-2 mr-2">
+                                                <div className="name font-serif text-lg">{user.name}</div>
+                                                <div className="username font-serif text-lg">
+                                                    {user.lastMessage.senderId === userId ? user.lastMessage.message : user.lastMessage.message}
+                                                </div>
+                                            </div>
+                                            {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
                                         </div>
-                                        {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
-                                    </div>
                                     }
-                                    else{
+                                    else {
                                         return <div key={user.id} className='Available-user flex items-center cursor-pointer w-full mt-2 mb-2 p-2 rounded-xl hover:bg-slate-200' onClick={(e) => { setCurrentChat(user) }}>
-                                        <div className="profile-image ml-2 mr-2">
-                                            <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
-                                        </div>
-                                        <div className="details ml-2 mr-2">
-                                            <div className="name font-serif text-lg">{user.name}</div>
-                                            <div className="username font-serif text-lg">
-                                                {user.lastMessage.senderId === userId ? user.lastMessage.message: user.lastMessage.message}
+                                            <div className="profile-image ml-2 mr-2">
+                                                <img src={user.profile} alt="profile" className='rounded-full h-14 w-14' onError={(e) => { e.target.src = Avatar }} />
                                             </div>
+                                            <div className="details ml-2 mr-2">
+                                                <div className="name font-serif text-lg">{user.name}</div>
+                                                <div className="username font-serif text-lg">
+                                                    {user.lastMessage.senderId === userId ? user.lastMessage.message : user.lastMessage.message}
+                                                </div>
+                                            </div>
+                                            {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
                                         </div>
-                                        {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
-                                    </div>
                                     }
                                 })
                                 : <div className="text-2xl font-bold text-center">No Chats to show</div>
-                            }
+                        }
                     </>
                     :
                     //Sekeleton loader

@@ -314,7 +314,7 @@ const Dashboard = () => {
                             </h2>
                         </div>
                         <div className='sidebar-right flex items-center'>
-                            <button id="dropdownMenuIconButton" onClick={() => { setShowMenu(!showMenu), setAddusersmenu(false) }} className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600" type="button">
+                            <button id="dropdownMenuIconButton" onClick={() => { setShowMenu(!showMenu), setAddusersmenu(false) }} className="inline-flex items-center p-2 text-sm font-medium text-center text-white bg-slate-800 rounded-lg hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-gray-600" type="button">
                                 <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
                                     <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
                                 </svg>
@@ -383,8 +383,8 @@ const Dashboard = () => {
                         )
                     }) :
                         <div role="status" className=" animate-pulse h-screen w-full">
-                            <div className="h-9 bg-gray-200 rounded-full dark:bg-gray-700 left p-2 m-2 w-2/5"></div>
-                            <div className="h-9 bg-gray-200 rounded-full dark:bg-gray-700 left p-2 m-2 block ml-auto w-2/5"></div>
+                            <div className="h-9 bg-gray-200 rounded-full left p-2 m-2 w-2/5"></div>
+                            <div className="h-9 bg-gray-200 rounded-full left p-2 m-2 block ml-auto w-2/5"></div>
                         </div>
                     }
                     {ShowContextMenu && <CustomContextMenu data={{ HandleCopyMessage, HandleDeleteMessage }} />}
