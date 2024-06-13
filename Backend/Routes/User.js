@@ -30,7 +30,10 @@ router.post("/signup", [
         const { name, email, username, password} = req.body;
         //check if user exists if not create one and return the result here
         try {
-            let user = await User.findOne({ username });
+            let user = await User.findOne({ $or: [
+                { email: email },
+                { username: username }
+              ] });
             if (user) {
                 res.json({ msg: "User Already Exist" })
             }
