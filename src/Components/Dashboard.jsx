@@ -207,7 +207,7 @@ const Dashboard = () => {
             body: JSON.stringify(Data)
         })
         setText("");
-        CurrentChat.lastMessage.message = textl
+        CurrentChat.lastMessage.message = text; 
     }
     const SendGroupMessage = async (e) => {
         e.preventDefault();
