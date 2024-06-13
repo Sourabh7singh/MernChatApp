@@ -4,6 +4,7 @@ const { validationResult, body } = require('express-validator');
 const User = require('../Models/User');
 const bcrypt = require('bcrypt');
 const { configDotenv } = require('dotenv');
+configDotenv();
 const cloudinary = require('cloudinary').v2;
 const SendEmail = require('../Utils/SendEmail');
 const Token = require('../Models/Token');
@@ -15,8 +16,8 @@ cloudinary.config({
     api_secret: process.env.Cloud_ApiSecret,
     secure: true
 });
-configDotenv();
-const saltRounds = 10;
+
+const saltRounds =Number(process.env.SaltRounds);
 // Route is /api/user
 router.post("/signup", [
     body('email').exists().isEmail(),
