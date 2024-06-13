@@ -74,8 +74,8 @@ const Profile = () => {
                 />
             </div>
             <form onSubmit={handleSubmit} className='gap-4 flex flex-col justify-center items-center'>
-                <input type="name" placeholder="Name" className="input p-2 m-2 rounded-lg" value={name} onChange={(e) => setName(e.target.value)} />
-                <input type="email" placeholder="Email" className="input p-2 m-2 rounded-lg" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input type="name" placeholder="Name" className="input p-2 m-2 rounded-lg" value={name} disabled />
+                <input type="email" placeholder="Email" className="input p-2 m-2 rounded-lg" value={email} disabled />
                 <input type="submit" className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' value="Submit" />
             </form>
         </div>
