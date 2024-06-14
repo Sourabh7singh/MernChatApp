@@ -1,8 +1,13 @@
 const dotenv = require('dotenv');
 dotenv.config();
+
 const nodemailer = require('nodemailer');
 
-const SendEmail = async (email, subject, text) => {
+const SendEmail = async (email, subject, name,url) => {
+    const text = `
+        Hello ${name},
+        You registered an account on Web Chat App, before being able to use your account you need to verify that this is your email address by clicking here: ${url}
+        Kind Regards, Web Chat App`;
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         service: 'gmail',
@@ -22,8 +27,6 @@ const SendEmail = async (email, subject, text) => {
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
-        } else {
-            console.log('Email sent: ' + info.response);
         }
     });
 }

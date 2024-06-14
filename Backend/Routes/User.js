@@ -17,7 +17,7 @@ cloudinary.config({
     secure: true
 });
 
-const saltRounds =Number(process.env.SaltRounds);
+const saltRounds = Number(process.env.SaltRounds);
 // Route is /api/user
 router.post("/signup", [
     body('email').exists().isEmail(),
@@ -27,22 +27,24 @@ router.post("/signup", [
 ], async (req, res) => {
     const result = validationResult(req);
     if (result.isEmpty()) {
-        const { name, email, username, password} = req.body;
+        const { name, email, username, password } = req.body;
         //check if user exists if not create one and return the result here
         try {
-            let user = await User.findOne({ $or: [
-                { email: email },
-                { username: username }
-              ] });
+            let user = await User.findOne({
+                $or: [
+                    { email: email },
+                    { username: username }
+                ]
+            });
             if (user) {
                 res.json({ msg: "User Already Exist" })
             }
             else {
                 bcrypt.hash(password, saltRounds, async function (err, hash) {
-                    user = await User.create({ name, email, username, password: hash, profile:`https://avatar.iran.liara.run/public/boy?username=${username}`})
+                    user = await User.create({ name, email, username, password: hash, profile: `https://avatar.iran.liara.run/public/boy?username=${username}` })
                     const token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
                     const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                    await SendEmail(email, "Verify Your Email", url);
+                    await SendEmail(email, "Welcome to Web Chat App, please verify your email address", user.name, url);
                     res.json({ msg: "An Email has been sent to your account for verification" });
                 });
             }
@@ -64,18 +66,18 @@ router.post("/login", [
             return res.json({ msg: "Invalid Credentials", Success: false })
         }
         //compare password using bcrypt
-        bcrypt.compare(password,user.password,async function(err, result) {
+        bcrypt.compare(password, user.password, async function (err, result) {
             if (result) {
-                if(!user.verified){
+                if (!user.verified) {
                     let token = await Token.findOne({ userId: user._id });
                     if (!token) {
                         token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
                     }
                     const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                    await SendEmail(user.email, "Verify Your Email", url);    
-                    res.json({ msg: "Verification Link has been sent to your email please verify your account", Success: false});
+                    await SendEmail(user.email, "Welcome to Web Chat App, please verify your email address", user.name, url);
+                    res.json({ msg: "Verification Link has been sent to your email please verify your account", Success: false });
                 }
-                else{
+                else {
                     res.json({ msg: "Login Successful", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
                 }
             }
@@ -89,11 +91,11 @@ router.post("/login", [
     }
 })
 router.post("/updateProfile", async (req, res) => {
-    const {id, image } = req.body;
+    const { id, image } = req.body;
     try {
         const result = await cloudinary.uploader.upload(image);
         await User.findByIdAndUpdate(id, { profile: result.secure_url });
-        res.json({ msg: "Profile Updated Successfully", Success: true});
+        res.json({ msg: "Profile Updated Successfully", Success: true });
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: "Some error occurred", Success: false });
