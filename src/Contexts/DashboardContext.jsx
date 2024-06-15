@@ -43,7 +43,7 @@ const DashboardProvider = ({ children }) => {
             body: JSON.stringify({ senderId: userId, receiverId:CurrentChat?.id })
         })
         const Messages = await responce.json();
-        setmessages(Messages);
+        setmessages(Messages.sort());
         setLoading(false);
     }
 
@@ -86,7 +86,7 @@ const DashboardProvider = ({ children }) => {
             ServerUrl,
             setUsers,
             fetchUsers,
-            convertTo12HourFormat,
+            // convertTo12HourFormat,
             ShowContextMenu,
             setShowContextMenu,
             setSelectedMessage,

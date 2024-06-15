@@ -17,6 +17,8 @@ cloudinary.config({
     secure: true
 });
 
+router.use(express.static('../public'));
+
 const saltRounds = Number(process.env.SaltRounds);
 // Route is /api/user
 router.post("/signup", [
@@ -91,16 +93,53 @@ router.post("/login", [
     }
 })
 router.post("/updateProfile", async (req, res) => {
-    const { id, image } = req.body;
-    try {
-        const result = await cloudinary.uploader.upload(image);
-        await User.findByIdAndUpdate(id, { profile: result.secure_url });
-        res.json({ msg: "Profile Updated Successfully", Success: true });
-    } catch (error) {
-        console.error(error);
+    // const { id, image } = req.body;
+    if(req.body.password && req.body.image){
+        try {
+            const { id, password, image } = req.body;
+            // const {id,password } = req.body;
+            const user = await User.findById(id);
+            bcrypt.hash(password, saltRounds, async function (err, hash) {
+                await User.updateOne({ _id: user._id }, { password: hash });
+            });
+
+            const result = await cloudinary.uploader.upload(image);
+            await User.findByIdAndUpdate(id, { profile: result.secure_url });
+            res.json({ msg: "Details updated Successfully", Success: true });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ msg: "Some error occurred", Success: false });
+        }
+    }
+    else if(req.body.image){
+        try {
+            const { id, image } = req.body;
+            const result = await cloudinary.uploader.upload(image);
+            await User.findByIdAndUpdate(id, { profile: result.secure_url });
+            res.json({ msg: "Details updated Successfully", Success: true });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ msg: "Some error occurred", Success: false });
+        }
+    }
+    else if(req.body.password){
+        try {
+            const { id, password } = req.body;
+            const user = await User.findById(id);
+            bcrypt.hash(password, saltRounds, async function (err, hash) {
+                await User.updateOne({ _id: user._id }, { password: hash });
+            });
+            res.json({ msg: "Details updated Successfully", Success: true });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ msg: "Some error occurred", Success: false });
+        }
+    }
+    else{
         res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
+
 router.get("/fetchusers/:userId", async (req, res) => {
     const { userId } = req.params;
     try {
@@ -168,4 +207,5 @@ router.get("/:id/verify/:token", async (req, res) => {
         res.status(500).send({ msg: "Some error occurred" });
     }
 })
+
 module.exports = router;

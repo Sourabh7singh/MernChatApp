@@ -28,6 +28,7 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
+
 html{
 	height: -webkit-fill-available;
 }
@@ -50,7 +51,10 @@ table {
 	border-spacing: 0;
 }
 
-
+*{
+	box-sizing: border-box;
+	
+}
 /* width */
 ::-webkit-scrollbar {
     width: 3px;
