@@ -3,7 +3,8 @@ dotenv.config();
 
 const nodemailer = require('nodemailer');
 
-const SendEmail = async (email, subject, name,url) => {
+const EmailVerification = async (email,name,url) => {
+    const subject = `Welcome ${name} to Web Chat App, please verify your email address`;
     const text = `
         Hello ${name},
         You registered an account on Web Chat App, before being able to use your account you need to verify that this is your email address by clicking here: ${url}
@@ -31,4 +32,4 @@ const SendEmail = async (email, subject, name,url) => {
     });
 }
 
-module.exports = SendEmail
+module.exports = EmailVerification

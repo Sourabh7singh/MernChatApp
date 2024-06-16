@@ -6,9 +6,13 @@ const bcrypt = require('bcrypt');
 const { configDotenv } = require('dotenv');
 configDotenv();
 const cloudinary = require('cloudinary').v2;
-const SendEmail = require('../Utils/SendEmail');
 const Token = require('../Models/Token');
 const crypto = require('crypto');
+const EmailVerification = require('../Utils/EmailVerification');
+const GenerateOtp = require('../Utils/GenerateOtp');
+const Code = require('../Models/Code');
+const ForgetPass = require('../Utils/ForgetPass');
+const { log } = require('console');
 // Return "https" URLs by setting secure: true
 cloudinary.config({
     cloud_name: process.env.Cloud_name,
@@ -46,8 +50,8 @@ router.post("/signup", [
                     user = await User.create({ name, email, username, password: hash, profile: `https://avatar.iran.liara.run/public/boy?username=${username}` })
                     const token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
                     const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                    await SendEmail(email, "Welcome to Web Chat App, please verify your email address", user.name, url);
-                    res.json({ msg: "An Email has been sent to your account for verification" });
+                    await EmailVerification(email, user.name, url);
+                    res.json({ msg: "An Email has been sent to your account for verification, please Check spam folder if not received in inbox" });
                 });
             }
         } catch (error) {
@@ -76,8 +80,8 @@ router.post("/login", [
                         token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
                     }
                     const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                    await SendEmail(user.email, "Welcome to Web Chat App, please verify your email address", user.name, url);
-                    res.json({ msg: "Verification Link has been sent to your email please verify your account", Success: false });
+                    await EmailVerification(user.email,user.name, url);
+                    res.json({ msg: "Verification Link has been sent to your email please verify your account, if not received in inbox please check spam folder", Success: false });
                 }
                 else {
                     res.json({ msg: "Login Successful", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
@@ -201,11 +205,103 @@ router.get("/:id/verify/:token", async (req, res) => {
         }
         await User.updateOne({ _id: user._id }, { verified: true });
         await Token.deleteOne({ _id: token._id });
-        res.send("Email verified successfully");
+        res.status(200).send("Email verified successfully");
     } catch (error) {
         console.error(error);
         res.status(500).send({ msg: "Some error occurred" });
     }
 })
 
+//Forget Password
+router.get("/resetpassword/:id", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.json({msg:"User does not exist",Success:false});
+        }
+        let code = await Code.findOne({ userId: user._id });
+        if (!code) {
+            //generate code
+            code = await new Code({ userId: user._id, code: GenerateOtp() }).save();
+        }
+        await ForgetPass(user.email,user.name,code.code);
+        res.json({msg:"OTP has been sent to your email address, please Check spam folder if not received in inbox",Success:true});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred",Success:false});
+    }
+})
+
+router.post("/verifyotp", async (req, res) => {
+    const { id, code } = req.body;
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            return res.json({msg:"User does not exist",Success:false});
+        }
+        const code1 = await Code.findOne({ userId: user._id });
+        if (code1.code == code) {
+            let token = await Token.findOne({ userId: user._id });
+                    if (!token) {
+                        token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
+                    }
+            return res.json({token:token.token,Success:true});
+        }
+        else {
+            return res.json({msg:"Invalid code",Success:false});
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred",Success:false});
+    }
+})
+// for token create to reset password
+router.get("/:id/verifytoken/:token", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(400).json({ msg: "Invalid link",Success:false });
+        }
+        const token = await Token.findOne({
+            userId: user._id,
+            token: req.params.token
+        });
+        if (!token) {
+            return res.status(400).json({ msg: "Invalid link",Success:false });
+        }
+        res.json({ msg: "Token verified successfully",Success:true});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred",Success:false });
+    }
+})
+
+router.post('/:id/changepassword/:token', async (req, res) => {
+    const {id,token} = req.params;
+    const { password } = req.body;
+    try {
+        const user = await User.findById(id);
+        const code = await Code.findOne({ userId: user._id });
+        if (!user) {
+            return res.status(400).json({ msg: "Invalid link",Success:false });
+        }
+        const token1 = await Token.findOne({
+            userId: user._id,
+            token: token
+        });
+        if (!token1) {
+            return res.status(400).json({ msg: "Invalid link",Success:false });
+        }
+
+        bcrypt.hash(password, saltRounds, async function (err, hash) {
+            await User.updateOne({ _id: user._id }, { password: hash });
+        });
+        await Token.deleteOne({ userId: user._id });
+        await Code.deleteOne({ userId: user._id });
+        res.json({ msg: "Password changed successfully",Success:true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Some error occurred",Success:false });
+    }
+})
 module.exports = router;
