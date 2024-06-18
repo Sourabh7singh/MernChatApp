@@ -80,7 +80,7 @@ router.post("/login", [
                         token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
                     }
                     const url = `${process.env.BASE_URL}/api/user/${user._id}/verify/${token.token}`;
-                    await EmailVerification(user.email,user.name, url);
+                    await EmailVerification(user.email, user.name, url);
                     res.json({ msg: "Verification Link has been sent to your email please verify your account, if not received in inbox please check spam folder", Success: false });
                 }
                 else {
@@ -97,53 +97,18 @@ router.post("/login", [
     }
 })
 router.post("/updateProfile", async (req, res) => {
-    // const { id, image } = req.body;
-    if(req.body.password && req.body.image){
-        try {
-            const { id, password, image } = req.body;
-            // const {id,password } = req.body;
-            const user = await User.findById(id);
-            bcrypt.hash(password, saltRounds, async function (err, hash) {
-                await User.updateOne({ _id: user._id }, { password: hash });
-            });
-
-            const result = await cloudinary.uploader.upload(image);
-            await User.findByIdAndUpdate(id, { profile: result.secure_url });
-            res.json({ msg: "Details updated Successfully", Success: true });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: "Some error occurred", Success: false });
-        }
-    }
-    else if(req.body.image){
-        try {
-            const { id, image } = req.body;
-            const result = await cloudinary.uploader.upload(image);
-            await User.findByIdAndUpdate(id, { profile: result.secure_url });
-            res.json({ msg: "Details updated Successfully", Success: true });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: "Some error occurred", Success: false });
-        }
-    }
-    else if(req.body.password){
-        try {
-            const { id, password } = req.body;
-            const user = await User.findById(id);
-            bcrypt.hash(password, saltRounds, async function (err, hash) {
-                await User.updateOne({ _id: user._id }, { password: hash });
-            });
-            res.json({ msg: "Details updated Successfully", Success: true });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: "Some error occurred", Success: false });
-        }
-    }
-    else{
+    try {
+        const { id, image } = req.body;
+        const result = await cloudinary.uploader.upload(image);
+        await User.findByIdAndUpdate(id, { profile: result.secure_url });
+        res.json({ msg: "Details updated Successfully", Success: true });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
 
+//Fetch All users except logged in user from DB
 router.get("/fetchusers/:userId", async (req, res) => {
     const { userId } = req.params;
     try {
@@ -160,6 +125,7 @@ router.get("/fetchusers/:userId", async (req, res) => {
     }
 })
 
+//Fetch logged in user
 router.get("/fetchuser/:userId", async (req, res) => {
     const { userId } = req.params;
     try {
@@ -171,6 +137,7 @@ router.get("/fetchuser/:userId", async (req, res) => {
     }
 })
 
+//Search Users 
 router.get("/searchusers", async (req, res) => {
     try {
         const keyword = req.query.search ? {
@@ -217,18 +184,18 @@ router.get("/resetpassword/:id", async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.json({msg:"User does not exist",Success:false});
+            return res.json({ msg: "User does not exist", Success: false });
         }
         let code = await Code.findOne({ userId: user._id });
-        if (!code) {
-            //generate code
-            code = await new Code({ userId: user._id, code: GenerateOtp() }).save();
+        if (code){
+            await code.deleteOne();
         }
-        await ForgetPass(user.email,user.name,code.code);
-        res.json({msg:"OTP has been sent to your email address, please Check spam folder if not received in inbox",Success:true});
+        code = await new Code({ userId: user._id, code: GenerateOtp() }).save();
+        await ForgetPass(user.email, user.name, code.code);
+        res.json({ msg: "OTP has been sent to your email address, please Check spam folder if not received in inbox", Success: true });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Some error occurred",Success:false});
+        res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
 
@@ -237,22 +204,22 @@ router.post("/verifyotp", async (req, res) => {
     try {
         const user = await User.findById(id);
         if (!user) {
-            return res.json({msg:"User does not exist",Success:false});
+            return res.json({ msg: "User does not exist", Success: false });
         }
         const code1 = await Code.findOne({ userId: user._id });
         if (code1.code == code) {
             let token = await Token.findOne({ userId: user._id });
-                    if (!token) {
-                        token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
-                    }
-            return res.json({token:token.token,Success:true});
+            if (!token) {
+                token = await new Token({ userId: user._id, token: crypto.randomBytes(32).toString("hex") }).save();
+            }
+            return res.json({ token: token.token, Success: true });
         }
         else {
-            return res.json({msg:"Invalid code",Success:false});
+            return res.json({ msg: "Invalid code", Success: false });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Some error occurred",Success:false});
+        res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
 // for token create to reset password
@@ -260,37 +227,37 @@ router.get("/:id/verifytoken/:token", async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(400).json({ msg: "Invalid link",Success:false });
+            return res.status(400).json({ msg: "Invalid link", Success: false });
         }
         const token = await Token.findOne({
             userId: user._id,
             token: req.params.token
         });
         if (!token) {
-            return res.status(400).json({ msg: "Invalid link",Success:false });
+            return res.status(400).json({ msg: "Invalid link", Success: false });
         }
-        res.json({ msg: "Token verified successfully",Success:true});
+        res.json({ msg: "Token verified successfully", Success: true });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Some error occurred",Success:false });
+        res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
 
 router.post('/:id/changepassword/:token', async (req, res) => {
-    const {id,token} = req.params;
+    const { id, token } = req.params;
     const { password } = req.body;
     try {
         const user = await User.findById(id);
         const code = await Code.findOne({ userId: user._id });
         if (!user) {
-            return res.status(400).json({ msg: "Invalid link",Success:false });
+            return res.status(400).json({ msg: "Invalid link", Success: false });
         }
         const token1 = await Token.findOne({
             userId: user._id,
             token: token
         });
         if (!token1) {
-            return res.status(400).json({ msg: "Invalid link",Success:false });
+            return res.status(400).json({ msg: "Invalid link", Success: false });
         }
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {
@@ -298,10 +265,10 @@ router.post('/:id/changepassword/:token', async (req, res) => {
         });
         await Token.deleteOne({ userId: user._id });
         await Code.deleteOne({ userId: user._id });
-        res.json({ msg: "Password changed successfully",Success:true });
+        res.json({ msg: "Password changed successfully", Success: true });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: "Some error occurred",Success:false });
+        res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
 module.exports = router;
