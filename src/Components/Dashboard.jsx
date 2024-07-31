@@ -1,5 +1,5 @@
 import React, {  useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import MyProfile from '../assets/MyProfile.png'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,7 +14,7 @@ const Dashboard = ({children}) => {
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
         , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, searchUsers,
         setActiveUsers,
-        setSearchUsers, ActiveUsers,
+        setSearchUsers, 
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -25,8 +25,7 @@ const Dashboard = ({children}) => {
         }
     }, [])
 
-    const [Section, setSection] = useState('Chats');
-
+    const location = useLocation();
     const [text, setText] = useState("");
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [SelectedGroupUsers, setSelectedGroupUsers] = useState([userId]);
@@ -40,9 +39,10 @@ const Dashboard = ({children}) => {
 
     const ChatContainerRef = useRef();
     const scrollPositionRef = useRef({ scrollTop: 0, scrollHeight: 0 });
+
     useEffect(() => {
         setCurrentChat(null);
-    }, [Section]);
+    }, [location]);
 
     useEffect(() => {
         setSocket(io(import.meta.env.VITE_SERVER_URL));
@@ -71,7 +71,7 @@ const Dashboard = ({children}) => {
             }
             CurrentChat.lastMessage.message = data.text
         })
-        if (Section === "Groups" && CurrentChat) {
+        if (location.pathname === "/groups" && CurrentChat) {
             let data = {
                 groupId: CurrentChat?._id,
                 socketId: socket?.id
@@ -157,7 +157,7 @@ const Dashboard = ({children}) => {
     }
     const HandleDeleteConversation = async () => {
         if (!CurrentChat) return;
-        if (Section === 'Chats') {
+        if (location.pathname === '/') {
             await fetch(`${ServerUrl}/api/conversation/deleteConversation/${CurrentChat?.conversationId}`, { method: "DELETE" })
             setConversations(Conversations.filter((item) => item.conversationId !== CurrentChat?.conversationId))
             toast("Conversation Deleted Successfully");
@@ -267,11 +267,11 @@ const Dashboard = ({children}) => {
     const HandleCreate = () => {
         // Handles both creating new conversaation group as well
         setShowMenu(false);
-        if (Section === 'Chats') {
+        if (location.pathname === '/') {
             setAddusersmenu(!Addusersmenu);
 
         }
-        else if (Section === 'Groups') {
+        else if (location.pathname === '/groups') {
             setAddusersmenu(!Addusersmenu);
             //For Group
         }
@@ -317,7 +317,7 @@ const Dashboard = ({children}) => {
                                 </svg>
                             </button>
                             {showMenu && <OptionMenu data={{ HandleCreate, setShowMenu }} />}
-                            {Addusersmenu && <SearchUserMenu data={{ Section, HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu }} />}
+                            {Addusersmenu && <SearchUserMenu data={{ HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu }} />}
                         </div>
                     </div>
                     <div className='search-bar w-full m-3 bg-slate-800 pl-2 pr-2 min-w-[260px] relative'>
@@ -369,7 +369,7 @@ const Dashboard = ({children}) => {
                         return (
                             <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>
                                 <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "70%", minWidth: "20%" }}>
-                                    <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${Section == 'Groups' ? msg?.name : ""}` : ""}</div>
+                                    <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${location.pathname == '/groups' ? msg?.name : ""}` : ""}</div>
                                     <div className="message ">
                                         <div className="text p-2">{msg.text}</div>
                                         <p className="time text-right" style={{ fontSize: "8px" }}>{DateConversion(msg.date)}</p>
@@ -387,7 +387,7 @@ const Dashboard = ({children}) => {
                     {ShowContextMenu && <CustomContextMenu data={{ HandleCopyMessage, HandleDeleteMessage }} />}
                 </div>
                 {CurrentChat !== "" && <div className="Send-Message relative">
-                    <form onSubmit={(e) => { Section == 'Chats' ? HandleSubmit(e) : SendGroupMessage(e) }}>
+                    <form onSubmit={(e) => { location.pathname == '/' ? HandleSubmit(e) : SendGroupMessage(e) }}>
                         <input type="text" placeholder="Type your message here..." value={text} onChange={(e) => setText(e.target.value)} className=" p-2 h-12 bg-slate-100 border-0 focus:outline-none focus:ring-0 focus:shadow-none w-full" />
                         <label htmlFor="send" className='cursor-pointer absolute' style={{ right: "10px", top: "50%", transform: "translateY(-50%)" }}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
