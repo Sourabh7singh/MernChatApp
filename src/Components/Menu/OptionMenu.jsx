@@ -1,8 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const OptionMenu = (props) => {
-    const { setSection, Section, HandleCreate, setShowMenu } = props.data;
+    const { HandleCreate, setShowMenu } = props.data;
+    const location = useLocation();
     const navigate = useNavigate();
     return (
         <div className="z-10 bg-slate-600 divide-y divide-gray-100 rounded-lg shadow w-44 absolute top-10 right-10">
@@ -12,10 +13,10 @@ const OptionMenu = (props) => {
                 </svg>
             </div>
             <ul className="p-2 text-sm text-gray-700" aria-labelledby="dropdownMenuIconButton">
-                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {setSection("Chats"); setShowMenu(false);}}>Chats</li>
-                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {setSection("Groups"); setShowMenu(false);}}>Groups</li>
-                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => HandleCreate()}>Create New {`${Section === 'Groups' ? 'Group' : 'Conversation'}`}</li>
-                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {setSection("Profile"); setShowMenu(false);}}>Profile</li>
+                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {navigate("/"); setShowMenu(false);}}>Chats</li>
+                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {navigate("/groups"); setShowMenu(false);}}>Groups</li>
+                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => HandleCreate()}>Create New {`${location.pathname === '/groups' ? 'Group' : 'Conversation'}`}</li>
+                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {navigate("/profile"); setShowMenu(false);}}>Profile</li>
                 <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {localStorage.removeItem("user"); navigate("/login");}}>Log Out</li>
             </ul>
         </div>

@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useId, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Avatar from '../../assets/MyProfile.png'
 import { DashboardContext } from '../../Contexts/DashboardContext';
-const Chats = (props) => {
+const Chats = () => {
     const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const { Conversations, ConversationLoading
         , FetchConversations, FetchMessages, CurrentChat, setCurrentChat, searchUsers,
-        ActiveUsers, setActiveUsers, } = useContext(DashboardContext);
+        ActiveUsers } = useContext(DashboardContext);
     useEffect(() => {
         FetchMessages(CurrentChat);
     }, [CurrentChat])

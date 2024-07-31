@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, {  useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Chats from './UserSection/Chats'
-import Profile from './UserSection/Profile'
-import Groups from './UserSection/Groups'
 import MyProfile from '../assets/MyProfile.png'
 import { io } from 'socket.io-client'
 import { ToastContainer, toast } from 'react-toastify';
@@ -11,7 +8,7 @@ import { DashboardContext } from '../Contexts/DashboardContext'
 import OptionMenu from './Menu/OptionMenu'
 import SearchUserMenu from './Menu/SearchUserMenu'
 import ShowProfile from './Menu/ShowProfile'
-const Dashboard = () => {
+const Dashboard = ({children}) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
@@ -319,7 +316,7 @@ const Dashboard = () => {
                                     <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
                                 </svg>
                             </button>
-                            {showMenu && <OptionMenu data={{ setSection, Section, HandleCreate, setShowMenu }} />}
+                            {showMenu && <OptionMenu data={{ HandleCreate, setShowMenu }} />}
                             {Addusersmenu && <SearchUserMenu data={{ Section, HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu }} />}
                         </div>
                     </div>
@@ -332,10 +329,10 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                {/* Search Bar */}
-                {Section === 'Chats' && <Chats />}
-                {Section === 'Profile' && <Profile />}
-                {Section === 'Groups' && <Groups data={{ setmessages, setCurrentChat }} />}
+
+                {/* Dynamically adding child */}
+                {children}
+
             </div>
 
             {/* Main-Chat screen */}

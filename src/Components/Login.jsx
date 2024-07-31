@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const Login = (props) => {
   const ServerUrl = import.meta.env.VITE_SERVER_URL;
   const [isLoading, setloading] = useState(false);
-  const [Responce, setResponce] = useState(false);
+  const [Responce,setResponce] = useState(false);
   const navigate = useNavigate();
   const { isLogin } = props;
   const [user, setUser] = useState({

@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { DashboardContext } from '../../Contexts/DashboardContext';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useLocation } from 'react-router-dom';
 
 const SearchUserMenu = (props) => {
     const [FetchedUsers, setFetchedUsers] = useState([]);
     const [search, setSearch] = useState("");
     const { ServerUrl, setCurrentChat } = useContext(DashboardContext);
-    const { Section, HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu } = props.data;
+    const location = useLocation();
+    const { HandleUserSelection, CreateGroup, setGroupName, groupName, SelectedGroupUsers, setSelectedGroupUsers, setAddusersmenu } = props.data;
     const FetchUsers = async () => {
         if (search === "") {
             return toast("Please Enter something", {
@@ -26,11 +28,11 @@ const SearchUserMenu = (props) => {
     useEffect(() => {
         setFetchedUsers([]);
         setSelectedGroupUsers([]);
-    }, [Section]);
+    }, []);
     return (
         <div className="z-10 bg-slate-600 divide-y divide-gray-100 rounded-lg shadow w-[250px] absolute top-10 right-0">
             {
-                Section === 'Chats' &&
+                location.pathname === '/' &&
                 <div className='SearchUser'>
                     <div className='flex justify-between m-2'>
                         <label htmlFor="user" className="block mb-2 text-sm font-medium text-white">Search For a user</label>
@@ -54,7 +56,7 @@ const SearchUserMenu = (props) => {
 
             }
             {
-                Section === 'Groups' && <div className="pt-2 text-sm flex justify-between items-center">
+                location.pathname === '/groups' && <div className="pt-2 text-sm flex justify-between items-center">
                     <h6 className='text-center text-white pl-2'>Create Group</h6>
                     <div className="done cursor-pointer pr-2" title='done?' onClick={() => { CreateGroup() }}>
                         <svg viewBox="0 0 24 24" fill="none" height={20} width={20} xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9 10L12.2581 12.4436C12.6766 12.7574 13.2662 12.6957 13.6107 12.3021L20 5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round"></path> <path d="M21 12C21 13.8805 20.411 15.7137 19.3156 17.2423C18.2203 18.7709 16.6736 19.9179 14.893 20.5224C13.1123 21.1268 11.187 21.1583 9.38744 20.6125C7.58792 20.0666 6.00459 18.9707 4.85982 17.4789C3.71505 15.987 3.06635 14.174 3.00482 12.2945C2.94329 10.415 3.47203 8.56344 4.51677 6.99987C5.56152 5.4363 7.06979 4.23925 8.82975 3.57685C10.5897 2.91444 12.513 2.81996 14.3294 3.30667" stroke="#ffffff" strokeWidth="2" strokeLinecap="round"></path> </g></svg>
@@ -62,7 +64,7 @@ const SearchUserMenu = (props) => {
                 </div>
             }
             {
-                Section === 'Groups' &&
+                location.pathname === '/groups' &&
                 <div className='relative'>
                     <div className='text-center font-thin text-lg p-2 m-1'>
                         <input type="text" placeholder='Enter the name of the group' id='group' className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5  w-full' value={groupName} onChange={(e) => { setGroupName(e.target.value) }} />
