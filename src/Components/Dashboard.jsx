@@ -1,7 +1,7 @@
 import React, {  useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import MyProfile from '../assets/MyProfile.png'
-import { io } from 'socket.io-client'
+import { io } from 'socket.io-client';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DashboardContext } from '../Contexts/DashboardContext'
@@ -45,7 +45,7 @@ const Dashboard = ({children}) => {
     }, [location]);
 
     useEffect(() => {
-        setSocket(io(import.meta.env.VITE_SERVER_URL));
+        setSocket(io(ServerUrl));
         fetchUsers();
     }, [])
 
@@ -123,7 +123,6 @@ const Dashboard = ({children}) => {
     };
 
     useEffect(() => {
-        // Adjust the scroll position after new messages are set
         if (!loading && scrollPositionRef.current.scrollHeight > 0) {
             requestAnimationFrame(() => {
                 if (ChatContainerRef.current) {
@@ -231,6 +230,7 @@ const Dashboard = ({children}) => {
         navigator.clipboard.writeText(selectedMessage?.text);
     }
     const HandleDeleteMessage = async () => {
+        if (selectedMessage.senderId != userId) return toast("You can't delete this message", { type: "info" });
         const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
             method: "POST",
             headers: {
