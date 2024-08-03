@@ -1,4 +1,4 @@
-import React, {  useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import MyProfile from '../assets/MyProfile.png'
 import { io } from 'socket.io-client';
@@ -8,13 +8,13 @@ import { DashboardContext } from '../Contexts/DashboardContext'
 import OptionMenu from './Menu/OptionMenu'
 import SearchUserMenu from './Menu/SearchUserMenu'
 import ShowProfile from './Menu/ShowProfile'
-const Dashboard = ({children}) => {
+const Dashboard = ({ children }) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
         , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, searchUsers,
         setActiveUsers,
-        setSearchUsers, 
+        setSearchUsers,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
     const LoggedInUser = localStorage.getItem("user");
@@ -109,16 +109,20 @@ const Dashboard = ({children}) => {
             };
         }
         setIsLazyloading(true);
-        const response = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({ senderId: userId, receiverId: CurrentChat?.id, before: messages[0].date })
-        });
-        const newMessages = await response.json();
-        setmessages(prevMessages => [...newMessages, ...prevMessages]);
-        setHasMoreMessages(newMessages.length === 20);
+        try {
+            const response = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({ senderId: userId, receiverId: CurrentChat?.id, before: messages[0].date })
+            });
+            const newMessages = await response.json();
+            setmessages(prevMessages => [...newMessages, ...prevMessages]);
+            setHasMoreMessages(newMessages.length === 20);
+        }catch(error) {
+            toast("Some Error Occurred. Please Try again in some time", { type: "info" });
+        }
         setIsLazyloading(false);
     };
 
@@ -133,17 +137,23 @@ const Dashboard = ({children}) => {
         }
     }, [messages]);
 
+    // Handle Scrolling for lazy loading
     const handleScroll = (e) => {
         if (e.target.scrollTop === 0 && HasMoreMessages && !isLazyloading) {
             handleLoadMessages();
         }
     };
+
+
+    // Context Menu Function
     const OpenContextMenu = (e, message) => {
         e.preventDefault();
         setCoordinates({ x: e.clientX, y: e.clientY });
         setShowContextMenu(!ShowContextMenu);
         setSelectedMessage(message);
     }
+
+    // Convert Date from miliseconds to 12hr format
     const DateConversion = (date) => {
         const date1 = new Date(Number(date));
         const hours = date1.getHours();
@@ -154,22 +164,35 @@ const Dashboard = ({children}) => {
         const time12hrFormat = `${hours12}:${minutes < 10 ? "0" : ""}${minutes} ${meridiem}`;
         return time12hrFormat;
     }
+
+
+    // Delete Conversation or Group
     const HandleDeleteConversation = async () => {
         if (!CurrentChat) return;
         if (location.pathname === '/') {
-            await fetch(`${ServerUrl}/api/conversation/deleteConversation/${CurrentChat?.conversationId}`, { method: "DELETE" })
-            setConversations(Conversations.filter((item) => item.conversationId !== CurrentChat?.conversationId))
-            toast("Conversation Deleted Successfully");
+            try {
+                await fetch(`${ServerUrl}/api/conversation/deleteConversation/${CurrentChat?.conversationId}`, { method: "DELETE" })
+                setConversations(Conversations.filter((item) => item.conversationId !== CurrentChat?.conversationId))
+                toast("Conversation Deleted Successfully");
+            } catch (error) {
+                toast("Some Error Occurred. Please Try again in some time", { type: "info" })
+            }
         }
         else {
-            const res = await fetch(`${ServerUrl}/api/groups/deletegroup/${CurrentChat?._id}/${userId}`, { method: "DELETE" })
-            const result = await res.json();
-            if (!result.Success) { return toast(result.msg, { type: "info" }) }
-            setCurrentChat(null);
-            FetchGroups();
-            toast("Group Deleted Successfully");
+            try {
+                const res = await fetch(`${ServerUrl}/api/groups/deletegroup/${CurrentChat?._id}/${userId}`, { method: "DELETE" })
+                const result = await res.json();
+                if (!result.Success) { return toast(result.msg, { type: "info" }) }
+                setCurrentChat(null);
+                FetchGroups();
+                toast("Group Deleted Successfully");
+            } catch (error) {
+                toast("Some Error Occurred. Please Try again in some time", { type: "info" })
+            }
         }
     }
+
+    // Send Messages for Current Chat
     const HandleSubmit = async (e) => {
         e.preventDefault();
         socket.emit('send-message', { senderId: userId, text, receiverId: CurrentChat?.id, date: Date.now() });
@@ -195,33 +218,44 @@ const Dashboard = ({children}) => {
             }
             setmessages([...messages, { senderId: userId, text, ConversationId: messages[0].conversationId, date: Date.now() }]);
         }
-        await fetch(`${ServerUrl}/api/conversation/sendMessage`, {
-            method: "POST",
-            headers: {
-                'Content-Type': "application/json"
-            },
-            body: JSON.stringify(Data)
-        })
-        setText("");
-        CurrentChat.lastMessage.message = text; 
+        try {
+            await fetch(`${ServerUrl}/api/conversation/sendMessage`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': "application/json"
+                },
+                body: JSON.stringify(Data)
+            })
+            setText("");
+            CurrentChat.lastMessage.message = text;
+        } catch (error) {
+            toast("Some Error Occurred. Please Try again in some time", { type: "info" });
+        }
     }
+
+
+    // Send Group Messages here
     const SendGroupMessage = async (e) => {
         e.preventDefault();
         socket.emit("sendGroupMessage", { text, senderId: userId, groupId: CurrentChat?._id, date: Date.now(), groupName: CurrentChat?.groupName });
-        const responce = await fetch(`${ServerUrl}/api/groups/sendmessage`, {
-            method: "POST",
-            headers: {
-                'Content-type': "application/json"
-            },
-            body: JSON.stringify({ text, groupId: CurrentChat?._id, senderId: userId, date: Date.now() })
-        });
-        const result = await responce.json();
-        if (!result.Success) {
-            toast("Please Try again in some time", { type: "info" });
-        }
-        else {
-            setmessages([...messages, { text, senderId: userId, receiverId: CurrentChat?.id, date: Date.now() }])
-            setText("");
+        try {
+            const responce = await fetch(`${ServerUrl}/api/groups/sendmessage`, {
+                method: "POST",
+                headers: {
+                    'Content-type': "application/json"
+                },
+                body: JSON.stringify({ text, groupId: CurrentChat?._id, senderId: userId, date: Date.now() })
+            });
+            const result = await responce.json();
+            if (!result.Success) {
+                toast("Please Try again in some time", { type: "info" });
+            }
+            else {
+                setmessages([...messages, { text, senderId: userId, receiverId: CurrentChat?.id, date: Date.now() }])
+                setText("");
+            }
+        } catch (error) {
+            toast("Some Error Occurred. Please Try again in some time", { type: "info" });
         }
 
     }
@@ -231,21 +265,25 @@ const Dashboard = ({children}) => {
     }
     const HandleDeleteMessage = async () => {
         if (selectedMessage.senderId != userId) return toast("You can't delete this message", { type: "info" });
-        const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
-            method: "POST",
-            headers: {
-                'Content-type': "application/json"
-            },
-            body: JSON.stringify({ text: selectedMessage?.text, date: selectedMessage?.date })
-        });
-        const result = await responce.json();
-        if (!result.Success) {
-            toast("Please Try again in some time", { type: "info" });
-        }
-        else {
-            toast("Message Deleted Successfully", { type: "success" });
-            setmessages(messages.filter((message) => message.date !== selectedMessage.date))
-            setShowContextMenu(false);
+        try {
+            const responce = await fetch(`${ServerUrl}/api/conversation/deleteMessage`, {
+                method: "POST",
+                headers: {
+                    'Content-type': "application/json"
+                },
+                body: JSON.stringify({ text: selectedMessage?.text, date: selectedMessage?.date })
+            });
+            const result = await responce.json();
+            if (!result.Success) {
+                toast("Some Error Occurred. Please Try again in some time", { type: "info" });
+            }
+            else {
+                toast("Message Deleted Successfully", { type: "success" });
+                setmessages(messages.filter((message) => message.date !== selectedMessage.date))
+                setShowContextMenu(false);
+            }
+        } catch (error) {
+            toast("Some Error Occurred. Please Try again in some time", { type: "info" });
         }
     }
     const CustomContextMenu = () => {
@@ -279,20 +317,28 @@ const Dashboard = ({children}) => {
     }
     const CreateGroup = async () => {
         setAddusersmenu(false);
-        const responce = await fetch(`${ServerUrl}/api/groups/createGroup`, {
-            method: "POST",
-            headers: {
-                'Content-type': "application/json"
-            },
-            body: JSON.stringify({ groupName, members: SelectedGroupUsers, admin: userId })
-        })
-        const result = await responce.json();
-        if (!result.Success) {
-            toast("Please Try again in some time");
+        if (SelectedGroupUsers.length < 2) {
+            toast("Please select atleast two users");
+            return;
         }
-        else {
-            toast("Group Created Successfully");
-            FetchGroups();
+        try {
+            const responce = await fetch(`${ServerUrl}/api/groups/createGroup`, {
+                method: "POST",
+                headers: {
+                    'Content-type': "application/json"
+                },
+                body: JSON.stringify({ groupName, members: SelectedGroupUsers, admin: userId })
+            })
+            const result = await responce.json();
+            if (!result.Success) {
+                toast("Please Try again in some time");
+            }
+            else {
+                toast("Group Created Successfully");
+                FetchGroups();
+            }
+        } catch (error) {
+            toast("Please Try again in some time", { type: "info" });
         }
 
     }
