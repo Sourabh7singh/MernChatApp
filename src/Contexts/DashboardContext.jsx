@@ -46,18 +46,7 @@ const DashboardProvider = ({ children }) => {
         setLoading(false);
     }
 
-    const convertTo12HourFormat = (utcTime) => {
-        const date = new Date(utcTime);
-        date.setHours(date.getHours());
-        date.setMinutes(date.getMinutes());
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-        let hours12 = hours % 12;
-        hours12 = hours12 ? hours12 : 12;
-        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes}${ampm}`;
-        return formattedTime;
-    }
+
     const FetchGroups = async () => {
         setGroupLoading(true);
         const userid = JSON.parse(localStorage.getItem("user")).id;
@@ -85,7 +74,6 @@ const DashboardProvider = ({ children }) => {
             ServerUrl,
             setUsers,
             fetchUsers,
-            // convertTo12HourFormat,
             ShowContextMenu,
             setShowContextMenu,
             setSelectedMessage,
