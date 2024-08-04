@@ -6,10 +6,11 @@ export const DashboardContext = createContext();
 const DashboardProvider = ({ children }) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
 
+
     // States
     const [Users, setUsers] = useState([]);
     const [socket, setSocket] = useState(null);
-    const userId = JSON.parse(localStorage.getItem("user"))?.id;
+    const userId = localStorage.getItem("userId");
     const [ShowContextMenu, setShowContextMenu] = useState(false);
     const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
     const [Conversations, setConversations] = useState([]);
@@ -23,10 +24,17 @@ const DashboardProvider = ({ children }) => {
     const [notificationCount, setNotificationCount] = useState([]);
     const [searchUsers, setSearchUsers] = useState("");
     const [ActiveUsers, setActiveUsers] = useState([]);
-
+    
     //Functions
+    const token = localStorage.getItem("token");
     const fetchUsers = async () => {
-        const result = await fetch(`${ServerUrl}/api/user/fetchUsers/${userId}`)
+        const result = await fetch(`${ServerUrl}/api/user/fetchUsers`,{
+            method: "GET",
+            headers: {
+                'Content-type': "application/json",
+                'Authorization': `Bearer ${token}`
+            }
+        })
         const responce = await result.json();
         setUsers(responce);
     }
@@ -37,27 +45,17 @@ const DashboardProvider = ({ children }) => {
         const responce = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
             method: "POST",
             headers: {
-                'Content-type': "application/json"
+                'Content-type': "application/json",
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ senderId: userId, receiverId:CurrentChat?.id })
+            body: JSON.stringify({ receiverId:CurrentChat?.id })
         })
         const Messages = await responce.json();
         setmessages(Messages.sort());
         setLoading(false);
     }
 
-    const convertTo12HourFormat = (utcTime) => {
-        const date = new Date(utcTime);
-        date.setHours(date.getHours());
-        date.setMinutes(date.getMinutes());
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-        let hours12 = hours % 12;
-        hours12 = hours12 ? hours12 : 12;
-        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes}${ampm}`;
-        return formattedTime;
-    }
+
     const FetchGroups = async () => {
         setGroupLoading(true);
         const userid = JSON.parse(localStorage.getItem("user")).id;
@@ -67,15 +65,18 @@ const DashboardProvider = ({ children }) => {
         setGroupLoading(false);
     }
 
-    const FetchConversations = async () => {
+    const FetchConversations = async (localtoken) => {
+        const bearer = localtoken || token;
         setConversationLoading(true);
-        const userid = JSON.parse(localStorage.getItem("user"))?.id;
-        const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations/${userid}`)
+        const result = await fetch(`${ServerUrl}/api/conversation/fetchConversations`,{
+            method: "GET",
+            headers: {
+                'Content-type': "application/json",
+                'Authorization': `Bearer ${bearer}`
+            }
+        })
         const responce = await result.json();
-        setConversations(responce.map((item) => {
-            const user = item.filter((user) => user.id !== userid)[0]
-            return user
-        }));
+        setConversations(responce);
         setConversationLoading(false);
     }
 
@@ -85,7 +86,6 @@ const DashboardProvider = ({ children }) => {
             ServerUrl,
             setUsers,
             fetchUsers,
-            // convertTo12HourFormat,
             ShowContextMenu,
             setShowContextMenu,
             setSelectedMessage,

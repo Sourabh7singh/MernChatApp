@@ -61,7 +61,7 @@ router.get("/getmessages/:groupId", async (req, res) => {
         await Promise.all(messages.map(async (message) => {
             const user = await User.findById(message.senderId);
             const { date, senderId, text, _id } = message;
-            newMessages.push({ date, groupId, senderId, text, _id, name: user.name });
+            newMessages.push({ date, groupId, senderId, text, _id, name: user.name,username: user.username});
         }));
         newMessages.sort((a, b) => a.date - b.date);
         res.json(newMessages);

@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react'
+import { json, useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { DashboardContext } from '../Contexts/DashboardContext';
 const Login = (props) => {
   const ServerUrl = import.meta.env.VITE_SERVER_URL;
   const [isLoading, setloading] = useState(false);
   const [Responce,setResponce] = useState(false);
+  const { FetchConversations } = useContext(DashboardContext);
   const navigate = useNavigate();
   const { isLogin } = props;
   const [user, setUser] = useState({
@@ -36,10 +38,20 @@ const Login = (props) => {
     setloading(false);
     toast(responce.msg);
     if (responce.Success) {
-      localStorage.setItem("user", JSON.stringify(responce.user))
+      console.log(responce);
+      localStorage.setItem("token",responce.token);
+      FetchConversations(responce.token);
+      //Fetch Conversation
       navigate("/")
     }
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, [])
   return (
     <div className='h-screen w-full flex justify-center items-center bg-slate-400'>
       <div>

@@ -3,6 +3,7 @@ const router = express.Router();
 const { validationResult, body } = require('express-validator');
 const User = require('../Models/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { configDotenv } = require('dotenv');
 configDotenv();
 const cloudinary = require('cloudinary').v2;
@@ -13,6 +14,7 @@ const GenerateOtp = require('../Utils/GenerateOtp');
 const Code = require('../Models/Code');
 const ForgetPass = require('../Utils/ForgetPass');
 const { log } = require('console');
+const AuthMiddleWare = require('../Middlewares/AuthMiddleWare');
 // Return "https" URLs by setting secure: true
 cloudinary.config({
     cloud_name: process.env.Cloud_name,
@@ -61,6 +63,7 @@ router.post("/signup", [
     }
 })
 
+
 router.post("/login", [
     body('username').exists().isLength({ min: 7 }),
     body('password').exists().isLength({ min: 7 })
@@ -84,7 +87,8 @@ router.post("/login", [
                     res.json({ msg: "Verification Link has been sent to your email please verify your account, if not received in inbox please check spam folder", Success: false });
                 }
                 else {
-                    res.json({ msg: "Login Successful", Success: true, user: { id: user._id, name: user.name, email: user.email, username: user.username } })
+                    const token = jwt.sign({ id: user._id, name: user.name, email: user.email, username: user.username }, process.env.JWT_SECRET);
+                    res.json({ msg: "Login Successful", Success: true, token:token });
                 }
             }
             else {
@@ -96,6 +100,8 @@ router.post("/login", [
         res.status(500).json({ msg: "Some error occurred", Success: false });
     }
 })
+
+
 router.post("/updateProfile", async (req, res) => {
     try {
         const { id, image } = req.body;
@@ -109,8 +115,9 @@ router.post("/updateProfile", async (req, res) => {
 })
 
 //Fetch All users except logged in user from DB
-router.get("/fetchusers/:userId", async (req, res) => {
-    const { userId } = req.params;
+
+router.get("/fetchusers", AuthMiddleWare,async (req, res) => {
+    const userId = req.user.id;
     try {
         let Allusers = [];
         let users = await User.find();

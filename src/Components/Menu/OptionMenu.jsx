@@ -17,7 +17,7 @@ const OptionMenu = (props) => {
                 <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {navigate("/groups"); setShowMenu(false);}}>Groups</li>
                 <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => HandleCreate()}>Create New {`${location.pathname === '/groups' ? 'Group' : 'Conversation'}`}</li>
                 <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {navigate("/profile"); setShowMenu(false);}}>Profile</li>
-                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {localStorage.removeItem("user"); navigate("/login");}}>Log Out</li>
+                <li className="block px-4 text-white py-2 rounded-md hover:bg-gray-900" onClick={() => {localStorage.removeItem("token"); navigate("/login");}}>Log Out</li>
             </ul>
         </div>
     );

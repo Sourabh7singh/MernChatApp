@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react'
 import Avatar from '../../assets/MyProfile.png'
 import { DashboardContext } from '../../Contexts/DashboardContext';
 const Chats = () => {
-    const userId = JSON.parse(localStorage.getItem("user"))?.id;
+    const userId = localStorage.getItem("userId");
     const { Conversations, ConversationLoading
         , FetchConversations, FetchMessages, CurrentChat, setCurrentChat, searchUsers,
         ActiveUsers } = useContext(DashboardContext);
@@ -11,10 +11,8 @@ const Chats = () => {
     }, [CurrentChat])
 
     useEffect(() => {
-        // Fetch Chats
         FetchConversations();
     }, [])
-
     return (
         <>
             <div className="Available-Uses">
@@ -31,7 +29,7 @@ const Chats = () => {
                                             <div className="details ml-2 mr-2">
                                                 <div className="name font-serif text-lg">{user.name}</div>
                                                 <div className="username font-serif text-lg">
-                                                    {user.lastMessage.senderId === userId ? user.lastMessage.message : user.lastMessage.message}
+                                                    {user.lastMessage.message}
                                                 </div>
                                             </div>
                                             {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}
@@ -45,7 +43,7 @@ const Chats = () => {
                                             <div className="details ml-2 mr-2">
                                                 <div className="name font-serif text-lg">{user.name}</div>
                                                 <div className="username font-serif text-lg">
-                                                    {user.lastMessage.senderId === userId ? user.lastMessage.message : user.lastMessage.message}
+                                                    {user.lastMessage.message}
                                                 </div>
                                             </div>
                                             {ActiveUsers.includes(user?.id) && <div className='OnlineDot bg-green-400 h-3 w-3 rounded-full ml-auto mr-2'></div>}

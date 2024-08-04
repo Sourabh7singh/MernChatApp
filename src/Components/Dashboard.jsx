@@ -10,6 +10,7 @@ import SearchUserMenu from './Menu/SearchUserMenu'
 import ShowProfile from './Menu/ShowProfile'
 const Dashboard = ({ children }) => {
     const ServerUrl = import.meta.env.VITE_SERVER_URL;
+    const userId = localStorage.getItem("userId");
     const { fetchUsers, ShowContextMenu, setShowContextMenu,
         coordinates, setCoordinates, FetchConversations, selectedMessage, setSelectedMessage, Conversations, setConversations
         , messages, setmessages, CurrentChat, setCurrentChat, FetchGroups, searchUsers,
@@ -17,8 +18,9 @@ const Dashboard = ({ children }) => {
         setSearchUsers,
         socket, setSocket, loading } = useContext(DashboardContext);
     const messageRef = useRef();
-    const LoggedInUser = localStorage.getItem("user");
+    const LoggedInUser = localStorage.getItem("token");
     const navigate = useNavigate();
+
     useEffect(() => {
         if (!LoggedInUser) {
             navigate("/login")
@@ -27,7 +29,6 @@ const Dashboard = ({ children }) => {
 
     const location = useLocation();
     const [text, setText] = useState("");
-    const userId = JSON.parse(localStorage.getItem("user"))?.id;
     const [SelectedGroupUsers, setSelectedGroupUsers] = useState([userId]);
     const [groupName, setGroupName] = useState("");
     const [Addusersmenu, setAddusersmenu] = useState(false);
@@ -35,20 +36,20 @@ const Dashboard = ({ children }) => {
     const [ShowuserProfile, setShowuserProfile] = useState(false);
     const [isLazyloading, setIsLazyloading] = useState(false);
     const [HasMoreMessages, setHasMoreMessages] = useState(true);
-
-
+    
+    
     const ChatContainerRef = useRef();
     const scrollPositionRef = useRef({ scrollTop: 0, scrollHeight: 0 });
-
+    
     useEffect(() => {
         setCurrentChat(null);
     }, [location]);
-
+    
     useEffect(() => {
         setSocket(io(ServerUrl));
         fetchUsers();
     }, [])
-
+    
     useEffect(() => {
         socket?.emit('addUser', userId);
         socket?.on("getUsers", users => {
@@ -113,9 +114,10 @@ const Dashboard = ({ children }) => {
             const response = await fetch(`${ServerUrl}/api/conversation/fetchMessages`, {
                 method: 'POST',
                 headers: {
-                    'Content-type': 'application/json'
+                    'Content-type': 'application/json',
+                    'Authorization': `Bearer ${LoggedInUser}`
                 },
-                body: JSON.stringify({ senderId: userId, receiverId: CurrentChat?.id, before: messages[0].date })
+                body: JSON.stringify({ receiverId: CurrentChat?.id, before: messages[0].date })
             });
             const newMessages = await response.json();
             setmessages(prevMessages => [...newMessages, ...prevMessages]);
@@ -414,8 +416,8 @@ const Dashboard = ({ children }) => {
                     {!loading ? messages.map((msg, index) => {
                         return (
                             <div key={index} onContextMenu={(e => OpenContextMenu(e, msg))}>
-                                <div className={msg.senderId !== userId ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderId !== userId ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "70%", minWidth: "20%" }}>
-                                    <div className="name font-mono mb-1 text-xs text-left">{msg.senderId !== userId ? `${location.pathname == '/groups' ? msg?.name : ""}` : ""}</div>
+                                <div className={msg.senderUsername == CurrentChat?.username ? 'left w-fit bg-lime-500 p-2 m-2' : 'right block ml-auto w-fit bg-lime-500 p-2 m-2'} style={{ borderRadius: msg.senderUsername == CurrentChat?.username ? "0 20px 20px 20px" : "20px 0 20px 20px", maxWidth: "70%", minWidth: "20%" }}>
+                                    <div className="name font-mono mb-1 text-xs text-left">{msg.senderUsername == CurrentChat?.username ? `${location.pathname == '/groups' ? msg?.name : ""}` : ""}</div>
                                     <div className="message ">
                                         <div className="text p-2">{msg.text}</div>
                                         <p className="time text-right" style={{ fontSize: "8px" }}>{DateConversion(msg.date)}</p>

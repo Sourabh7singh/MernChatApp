@@ -3,13 +3,15 @@ const Conversation = require('../Models/Conversation');
 const User = require('../Models/User');
 const Message = require('../Models/Message');
 const Groups = require('../Models/Groups');
+const AuthMiddleWare = require('../Middlewares/AuthMiddleWare');
 const router = express.Router();
 
 //Non Realtime Routes
-router.post("/sendMessage", async (req, res) => {
+router.post("/sendMessage",AuthMiddleWare, async (req, res) => {
+    const senderId = req.user.id;
     //Conversation with person done before
     if (req.body.ConversationId) {
-        const {senderId,ConversationId,message,date}=req.body;
+        const {ConversationId,message,date}=req.body;
         const Messages = await Message.create({ conversationId:ConversationId, senderId, text: message,date })
         Messages.save();
         const conversation = await Conversation.findById(ConversationId);
@@ -20,7 +22,7 @@ router.post("/sendMessage", async (req, res) => {
     //New Conversation totally
     else {
         try {
-            const { senderId, receiverId, message,date } = req.body;
+            const { receiverId, message,date } = req.body;
             //Check if conversation with this sender and receiver exists or not
             let ConversationRoom = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });
             if(!ConversationRoom){
@@ -43,10 +45,11 @@ router.post("/sendMessage", async (req, res) => {
 
 })
 
-//Fetch conversations that are previously done with anyone or Recent Conversations
-router.get("/fetchConversations/:userId", async (req, res) => {
-    const userId = req.params.userId;
-    var Allconversation = [];
+
+// Fetch conversations that are previously done with anyone or Recent Conversations
+router.get("/fetchConversations", AuthMiddleWare , async (req, res) => {
+    const userId = req.user.id;
+    let Allconversations = [];
     try {
         const ConversationRoom = await Conversation.find({ members: { $in: userId } });
         const userPromises = [];
@@ -54,27 +57,45 @@ router.get("/fetchConversations/:userId", async (req, res) => {
         ConversationRoom.forEach((item) => {
             const { members } = item;
             members.forEach((id) => {
-                userPromises.push(User.findById(id));
+                if (id.toString() !== userId.toString()) {
+                    userPromises.push(User.findById(id));
+                }
             });
         });
+
         const usersData = await Promise.all(userPromises);
-        ConversationRoom.forEach((item, index) => {
+
+        ConversationRoom.forEach((item) => {
             const { members } = item;
-            const userNames = members.map((id) => {
-                const user = usersData.find((user) => user.id.toString() === id.toString());
-                return { id: user._id, name: user.name, username: user.username, profile: user.profile,conversationId:item._id,lastMessage:item.lastMessage };
-            });            
-            Allconversation.push(userNames);
+            members
+                .filter((id) => id.toString() !== userId.toString())
+                .forEach((id) => {
+                    const user = usersData.find((user) => user._id.toString() === id.toString());
+                    if (user) {
+                        Allconversations.push({
+                            id: user._id,
+                            name: user.name,
+                            username: user.username,
+                            profile: user.profile,
+                            conversationId: item._id,
+                            lastMessage: item.lastMessage
+                        });
+                    }
+                });
         });
-        res.json(Allconversation);
+
+        res.json(Allconversations);
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: "Some error occurred" });
     }
 });
 
-router.post("/fetchMessages",async(req,res)=>{
-    const {senderId,receiverId} = req.body;
+
+
+router.post("/fetchMessages",AuthMiddleWare,async(req,res)=>{
+    const senderId = req.user.id;
+    const {receiverId} = req.body;
     const before = req.body.before?req.body.before:Date.now();
     try {
         const conversation = await Conversation.findOne({ members: { $all: [senderId, receiverId] } });    
@@ -86,6 +107,13 @@ router.post("/fetchMessages",async(req,res)=>{
             conversationId,
             date: { $lte: before }
         }).sort({ date: -1 }).limit(20);
+
+        // Append username to the message object for frontend usage
+        await Promise.all(messages.map(async (message) => {
+            const sender = await User.findById(message.senderId);
+            message.senderUsername = sender.username;
+            return message;
+        }));
         messages.reverse();
         res.json(messages)
     } catch (error) {
@@ -120,19 +148,6 @@ router.post("/deleteMessage",async(req,res)=>{
         res.status(500).json({ msg: "Some error occurred" });
     }
 })
-
-// // Groups
-// router.post("/createGroup", async (req, res) => {
-//     const { name,members,admin } = req.body;
-//     try {
-//         const newGroup = await Groups.create({ name,members,admin });
-//         newGroup.save();
-//         res.json({ msg: "Group Created Successfully",group:newGroup });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ msg: "Some error occurred" });
-//     }
-// });
 
 
 module.exports = router;
