@@ -353,7 +353,7 @@ const Dashboard = ({ children }) => {
                     <div className="Upper flex w-full justify-between">
                         <div className='sidebar-left m-2'>
                             <h2 className='font-serif font-bold text-white'>
-                                Web-Chat
+                                ChatSphere
                             </h2>
                         </div>
                         <div className='sidebar-right flex items-center'>
@@ -445,7 +445,7 @@ const Dashboard = ({ children }) => {
                 </div>}
             </div> :
                 <div className='Main-chat-Screen bg-gray-500 h-full w-3/4 flex justify-center items-center' data-bs-chat={`${CurrentChat ? "set" : "unset"}`}>
-                    <div className='Main-chat-Screen text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>Web-Chat</div></div>}
+                    <div className='Main-chat-Screen text-3xl font-mono bg-slate-100 p-4 rounded-2xl'>ChatSphere</div></div>}
         </div>
     )
 }

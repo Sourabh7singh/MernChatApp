@@ -1,0 +1,607 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+.loginPage {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  background: #0a0a1a;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Animated Mesh Gradient Background ── */
+.meshBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.meshBg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(120, 50, 255, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 200, 255, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(200, 50, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(50, 100, 255, 0.2) 0%, transparent 40%);
+  animation: meshMove 20s ease-in-out infinite;
+}
+
+.meshBg::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -30%;
+  width: 160%;
+  height: 160%;
+  background: 
+    radial-gradient(ellipse at 60% 30%, rgba(0, 220, 180, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 70%, rgba(140, 80, 255, 0.18) 0%, transparent 50%);
+  animation: meshMove 25s ease-in-out infinite reverse;
+}
+
+@keyframes meshMove {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2%, -3%) rotate(1deg); }
+  50% { transform: translate(-1%, 2%) rotate(-0.5deg); }
+  75% { transform: translate(3%, 1%) rotate(0.5deg); }
+}
+
+/* ── Floating Particles ── */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat linear infinite;
+}
+
+.particle:nth-child(1) {
+  width: 4px; height: 4px;
+  background: rgba(120, 150, 255, 0.6);
+  left: 10%; top: 20%;
+  animation-duration: 12s;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+  width: 6px; height: 6px;
+  background: rgba(0, 210, 255, 0.5);
+  left: 25%; top: 70%;
+  animation-duration: 15s;
+  animation-delay: 2s;
+}
+
+.particle:nth-child(3) {
+  width: 3px; height: 3px;
+  background: rgba(180, 100, 255, 0.7);
+  left: 60%; top: 30%;
+  animation-duration: 10s;
+  animation-delay: 4s;
+}
+
+.particle:nth-child(4) {
+  width: 5px; height: 5px;
+  background: rgba(0, 200, 180, 0.5);
+  left: 75%; top: 80%;
+  animation-duration: 18s;
+  animation-delay: 1s;
+}
+
+.particle:nth-child(5) {
+  width: 4px; height: 4px;
+  background: rgba(140, 80, 255, 0.6);
+  left: 45%; top: 10%;
+  animation-duration: 14s;
+  animation-delay: 3s;
+}
+
+.particle:nth-child(6) {
+  width: 7px; height: 7px;
+  background: rgba(80, 160, 255, 0.4);
+  left: 85%; top: 50%;
+  animation-duration: 20s;
+  animation-delay: 5s;
+}
+
+@keyframes particleFloat {
+  0% { opacity: 0; transform: translateY(0) translateX(0); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-100vh) translateX(30px); }
+}
+
+/* ── Floating Chat Bubbles (Decorative) ── */
+.chatBubbles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chatBubbleDecor {
+  position: absolute;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  animation: bubbleFloat ease-in-out infinite;
+}
+
+.chatBubbleDecor:nth-child(1) {
+  width: 120px; height: 40px;
+  background: rgba(120, 80, 255, 0.08);
+  top: 15%; left: 5%;
+  animation-duration: 8s;
+  border-radius: 20px 20px 20px 4px;
+}
+
+.chatBubbleDecor:nth-child(2) {
+  width: 160px; height: 50px;
+  background: rgba(0, 200, 255, 0.06);
+  top: 60%; left: 8%;
+  animation-duration: 10s;
+  animation-delay: 1s;
+  border-radius: 20px 20px 4px 20px;
+}
+
+.chatBubbleDecor:nth-child(3) {
+  width: 100px; height: 35px;
+  background: rgba(200, 100, 255, 0.07);
+  top: 35%; right: 8%;
+  animation-duration: 9s;
+  animation-delay: 2s;
+  border-radius: 20px 20px 20px 4px;
+}
+
+.chatBubbleDecor:nth-child(4) {
+  width: 140px; height: 45px;
+  background: rgba(0, 220, 180, 0.06);
+  top: 80%; right: 12%;
+  animation-duration: 11s;
+  animation-delay: 3s;
+  border-radius: 20px 20px 4px 20px;
+}
+
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+/* ── Main Layout ── */
+.loginContainer {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── Left Branding Panel ── */
+.brandPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  position: relative;
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brandPanel.mounted {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.logoIcon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4); }
+  50% { box-shadow: 0 8px 48px rgba(124, 58, 237, 0.6); }
+}
+
+.brandName {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #e0e7ff, #a5b4fc, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.brandTagline {
+  font-size: 1.1rem;
+  color: rgba(200, 210, 255, 0.6);
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.brandFeatures {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(200, 210, 255, 0.5);
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.featureItem.mounted {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.featureDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Form Panel ── */
+.formPanel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(15, 15, 35, 0.7);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 
+    0 32px 64px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: translateY(30px) scale(0.97);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0.2s;
+}
+
+.formCard.mounted {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.formHeader {
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f0f0ff;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.formSubtitle {
+  font-size: 0.9rem;
+  color: rgba(200, 210, 255, 0.45);
+  font-weight: 400;
+}
+
+/* ── Input Groups ── */
+.inputGroup {
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inputGroup.mounted {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.inputLabel {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(200, 210, 255, 0.6);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: rgba(200, 210, 255, 0.3);
+  transition: color 0.3s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.inputWrapper.focused .inputIcon {
+  color: #7c3aed;
+}
+
+.inputField {
+  width: 100%;
+  padding: 14px 14px 14px 44px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #e0e7ff;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.inputField::placeholder {
+  color: rgba(200, 210, 255, 0.25);
+}
+
+.inputField:focus {
+  border-color: rgba(124, 58, 237, 0.5);
+  background: rgba(124, 58, 237, 0.06);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12), 0 4px 16px rgba(124, 58, 237, 0.08);
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  color: rgba(200, 210, 255, 0.3);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.passwordToggle:hover {
+  color: rgba(200, 210, 255, 0.7);
+}
+
+/* ── Submit Button ── */
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9, #4f46e5);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  letter-spacing: 0.02em;
+}
+
+.submitBtn.mounted {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.submitBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed, #06b6d4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.submitBtn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.submitBtn:hover:not(:disabled) {
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.5);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ── Loading Spinner ── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Divider ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 1.5rem 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.divider.mounted {
+  opacity: 1;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dividerText {
+  font-size: 0.75rem;
+  color: rgba(200, 210, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+/* ── Toggle Link ── */
+.toggleLink {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(200, 210, 255, 0.45);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+  animation-delay: 1s;
+}
+
+.toggleLink:hover {
+  color: #a78bfa;
+}
+
+.toggleLink strong {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.toggleLink:hover strong {
+  color: #c4b5fd;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+  }
+
+  .brandPanel {
+    padding: 2rem 1.5rem 1rem;
+    flex: 0;
+  }
+
+  .brandFeatures {
+    display: none;
+  }
+
+  .brandTagline {
+    font-size: 0.95rem;
+  }
+
+  .formPanel {
+    padding: 1rem 1.5rem 2rem;
+  }
+
+  .formCard {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .formTitle {
+    font-size: 1.5rem;
+  }
+
+  .brandName {
+    font-size: 1.6rem;
+  }
+
+  .logoIcon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ── Toast Overrides (global since these are third-party classes) ── */
+:global(.Toastify__toast) {
+  background: rgba(15, 15, 35, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  color: #e0e7ff !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+:global(.Toastify__close-button) {
+  color: rgba(200, 210, 255, 0.5) !important;
+}
+
+:global(.Toastify__progress-bar) {
+  background: linear-gradient(90deg, #7c3aed, #06b6d4) !important;
+}

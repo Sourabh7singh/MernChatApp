@@ -71,7 +71,7 @@ const Otp = () => {
         <div className="App h-screen">
             <ToastContainer />
             <div className="header">
-                <h1 className="text-3xl font-bold w-full text-center bg-slate-700 text-white p-4">Web-Chat OTP Verification</h1>
+                <h1 className="text-3xl font-bold w-full text-center bg-slate-700 text-white p-4">ChatSphere OTP Verification</h1>
             </div>
             <div className="w-full bg-gray-50 p-6">
                 <div className="bg-white px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
