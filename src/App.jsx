@@ -7,6 +7,7 @@ import CreatePassword from './Components/CreatePassword'
 import Groups from './Components/UserSection/Groups'
 import Profile from './Components/UserSection/Profile'
 import Chats from './Components/UserSection/Chats'
+import Overview from './Components/Overview'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path='/createpassword' element={<CreatePassword/>} />
           <Route path='/groups' element={<Dashboard><Groups/></Dashboard>}/>
           <Route path='/profile' element={<Dashboard><Profile/></Dashboard>}/>
+          <Route path='/overview' element={<Overview/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
