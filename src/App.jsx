@@ -8,6 +8,7 @@ import Groups from './Components/UserSection/Groups'
 import Profile from './Components/UserSection/Profile'
 import Chats from './Components/UserSection/Chats'
 import Overview from './Components/Overview'
+import NotFound from './Components/NotFound'
 
 function App() {
   return (
@@ -24,6 +25,9 @@ function App() {
           <Route path='/groups' element={<Dashboard><Groups/></Dashboard>}/>
           <Route path='/profile' element={<Dashboard><Profile/></Dashboard>}/>
           <Route path='/overview' element={<Overview/>}/>
+          
+          {/* Catch-all 404 Route */}
+          <Route path='*' element={<NotFound/>} />
         </Route>
       </Routes>
     </BrowserRouter>
